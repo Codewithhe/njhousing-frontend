@@ -171,7 +171,9 @@ function ContactQueryform() {
       case 1:
         return (
           <View>
-            <CustomText style={{ fontWeight: "bold", fontSize: 18, marginTop: 10 }}>
+            <CustomText
+              style={{ fontWeight: "bold", fontSize: 18, marginTop: 10 }}
+            >
               Pre-Application
             </CustomText>
             <CustomText style={{ marginTop: 10 }}>
@@ -307,7 +309,9 @@ function ContactQueryform() {
               />
             )}
 
-            <CustomText style={{ marginTop: 10, fontWeight: "bold" }}>Gender</CustomText>
+            <CustomText style={{ marginTop: 10, fontWeight: "bold" }}>
+              Gender
+            </CustomText>
             <ScrollView horizontal={true} style={{ flexDirection: "row" }}>
               {["Male", "Female", "Transgender", "Other"].map((option) => (
                 <Checkbox.Item
@@ -402,7 +406,6 @@ function ContactQueryform() {
               </CustomText>
             )}
 
-
             <TextInput
               style={styles.input}
               placeholder="What is the combined gross annual income for all Household Members?"
@@ -411,7 +414,11 @@ function ContactQueryform() {
               onBlur={handleBlur("grossIncome")}
               keyboardType="numeric"
             />
-             <CustomText style={{ fontWeight: "bold" }}>Please include the gross BEFORE tax income of all household members. Income includes gross wages, salaries, tips, commissions, overtime, alimony, child support, pensions, social security, unemployment, and disability benefits.
+            <CustomText style={{ fontWeight: "bold" }}>
+              Please include the gross BEFORE tax income of all household
+              members. Income includes gross wages, salaries, tips, commissions,
+              overtime, alimony, child support, pensions, social security,
+              unemployment, and disability benefits.
             </CustomText>
             {touched.grossIncome && errors.grossIncome && (
               <CustomText style={{ color: "red", marginTop: 10 }}>
@@ -433,7 +440,9 @@ function ContactQueryform() {
               </CustomText>
             )}
 
-            <CustomText style={{ fontWeight: "bold" }}>Are you a veteran?</CustomText>
+            <CustomText style={{ fontWeight: "bold" }}>
+              Are you a veteran?
+            </CustomText>
             <View style={{ flexDirection: "row" }}>
               {["Yes", "No"].map((option) => (
                 <Checkbox.Item
@@ -484,7 +493,8 @@ function ContactQueryform() {
             )}
 
             <CustomText style={{ fontWeight: "bold" }}>
-             Will you receive rental assistance from other sources including family members outside of the household? *
+              Will you receive rental assistance from other sources including
+              family members outside of the household? *
             </CustomText>
             <View style={{ flexDirection: "row" }}>
               {["Yes", "No"].map((option) => (
@@ -543,10 +553,14 @@ function ContactQueryform() {
               onBlur={handleBlur("rent")}
             />
             {touched.rent && errors.rent && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>{errors.rent}</CustomText>
+              <CustomText style={{ color: "red", marginTop: 10 }}>
+                {errors.rent}
+              </CustomText>
             )}
 
-            <CustomText style={{ fontWeight: "bold" }}>Total Household Size:</CustomText>
+            <CustomText style={{ fontWeight: "bold" }}>
+              Total Household Size:
+            </CustomText>
             <View style={{ flexDirection: "row" }}>
               {["1", "2", "3", "4", "5+"].map((size) => (
                 <TouchableOpacity
@@ -595,26 +609,34 @@ function ContactQueryform() {
               />
             </View>
 
-            <View style={{  alignItems: "center" }}>
+            <View style={{ alignItems: "center" }}>
               <Text>Are any household members Veterans? :</Text>
               <Switch
                 value={values.veteran || false}
                 onValueChange={(val) => setFieldValue("veteran", val)}
                 style={{ marginLeft: 10 }}
               />
-              <Text>There are currently no units in our portfolio that provide a veterans preference. We are collecting this information in the event that a preference becomes available in the future.</Text>
-
+              <Text>
+                There are currently no units in our portfolio that provide a
+                veterans preference. We are collecting this information in the
+                event that a preference becomes available in the future.
+              </Text>
             </View>
 
             <View style={{ alignItems: "center" }}>
-              <Text>Would you like to be contacted for studio apartments? *</Text>
+              <Text>
+                Would you like to be contacted for studio apartments? *
+              </Text>
               <Switch
                 value={values.studioContact || false}
                 onValueChange={(val) => setFieldValue("studioContact", val)}
                 style={{ marginLeft: 10 }}
               />
-              <Text>All applicants will be considered for the one bedroom apartments. If you answer no, you will ONLY be contacted about one bedroom apartments.
-</Text>
+              <Text>
+                All applicants will be considered for the one bedroom
+                apartments. If you answer no, you will ONLY be contacted about
+                one bedroom apartments.
+              </Text>
             </View>
           </View>
         );
@@ -634,8 +656,14 @@ function ContactQueryform() {
               onBlur={handleBlur("eSignature")}
             />
             <CustomText style={{ fontWeight: "bold", fontSize: 18 }}>
-I certify that the information provided herein is true and complete and that any misrepresentation of income or household size reported herein shall be cause for program disqualification. I also understand that this information is to be used only for determining my preliminary eligibility for referral to an affordable housing unit and does not obligate me in any way.            </CustomText>
-            
+              I certify that the information provided herein is true and
+              complete and that any misrepresentation of income or household
+              size reported herein shall be cause for program disqualification.
+              I also understand that this information is to be used only for
+              determining my preliminary eligibility for referral to an
+              affordable housing unit and does not obligate me in any way.{" "}
+            </CustomText>
+
             {touched.eSignature && errors.eSignature && (
               <CustomText style={{ color: "red", marginTop: 10 }}>
                 {errors.eSignature}
@@ -656,8 +684,11 @@ I certify that the information provided herein is true and complete and that any
               />
             </TouchableOpacity>
 
- <CustomText style={{ fontWeight: "bold", fontSize: 18 }}>
-Once we come to your name on the waiting list, you will be asked to verify your household composition and income, among other factors. All information will be verified.        </CustomText>
+            <CustomText style={{ fontWeight: "bold", fontSize: 18 }}>
+              Once we come to your name on the waiting list, you will be asked
+              to verify your household composition and income, among other
+              factors. All information will be verified.{" "}
+            </CustomText>
             {touched.signatureDate && errors.signatureDate && (
               <CustomText style={{ color: "red", marginTop: 10 }}>
                 {errors.signatureDate}
@@ -770,7 +801,9 @@ Once we come to your name on the waiting list, you will be asked to verify your 
             {touched.monthly === false &&
               touched.yearly === false &&
               errors.monthly && (
-                <CustomText style={{ color: "red", marginTop: 10, marginTop: 10 }}>
+                <CustomText
+                  style={{ color: "red", marginTop: 10, marginTop: 10 }}
+                >
                   {errors.monthly}
                 </CustomText>
               )}
@@ -803,17 +836,17 @@ Once we come to your name on the waiting list, you will be asked to verify your 
         handleSubmit,
         setFieldValue,
       }) => (
-        <ScrollView style={{ padding: 20, backgroundColor: "white" }}>
-          <ProgressBar currentStep={step} totalSteps={totalSteps} />
-          {renderStep({
-            values,
-            errors,
-            touched,
-            handleChange,
-            handleBlur,
-            setFieldValue,
-          })}
-
+        <>
+          <ScrollView style={{ padding: 20, backgroundColor: "white" }}>
+            {renderStep({
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              setFieldValue,
+            })}
+          </ScrollView>
           <View
             style={{
               flexDirection: "row",
@@ -851,7 +884,7 @@ Once we come to your name on the waiting list, you will be asked to verify your 
               </CustomText>
             </TouchableOpacity>
           </View>
-        </ScrollView>
+        </>
       )}
     </Formik>
   );

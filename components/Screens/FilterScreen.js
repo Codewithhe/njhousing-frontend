@@ -75,101 +75,102 @@ const FilterScreen = ({ onApplyFilters }) => {
   ].sort((a, b) => a - b);
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.container, { paddingBottom: 300 }]}
-    >
-      <View style={styles.inputContainer}>
-        <CustomText style={styles.label}>Location</CustomText>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter Location"
-          value={location}
-          onChangeText={setLocation}
-        />
-      </View>
-
-      <View style={styles.inputContainer}>
-        <CustomText style={styles.label}>Bedrooms</CustomText>
-        <View style={styles.tabContainer}>
-          {bedroomNumbers.map((num) => (
-            <TouchableOpacity
-              key={num}
-              style={[
-                styles.tab,
-                selectedBedrooms.includes(num) && styles.selectedTab,
-              ]}
-              onPress={() =>
-                toggleSelection(num, selectedBedrooms, setSelectedBedrooms)
-              }
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  selectedBedrooms.includes(num) && styles.selectedTabText,
-                ]}
-              >
-                {num} Bed
-              </Text>
-            </TouchableOpacity>
-          ))}
+    <>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingBottom: 300 }]}
+      >
+        <View style={styles.inputContainer}>
+          <CustomText style={styles.label}>Location</CustomText>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Location"
+            value={location}
+            onChangeText={setLocation}
+          />
         </View>
 
-        <CustomText style={styles.label}>Bathrooms</CustomText>
-        <View style={styles.tabContainer}>
-          {bathNumbers.map((num) => (
-            <TouchableOpacity
-              key={num}
-              style={[
-                styles.tab,
-                selectedBathrooms.includes(num) && styles.selectedTab,
-              ]}
-              onPress={() =>
-                toggleSelection(num, selectedBathrooms, setSelectedBathrooms)
-              }
-            >
-              <Text
+        <View style={styles.inputContainer}>
+          <CustomText style={styles.label}>Bedrooms</CustomText>
+          <View style={styles.tabContainer}>
+            {bedroomNumbers.map((num) => (
+              <TouchableOpacity
+                key={num}
                 style={[
-                  styles.tabText,
-                  selectedBathrooms.includes(num) && styles.selectedTabText,
+                  styles.tab,
+                  selectedBedrooms.includes(num) && styles.selectedTab,
                 ]}
+                onPress={() =>
+                  toggleSelection(num, selectedBedrooms, setSelectedBedrooms)
+                }
               >
-                {num} Bath
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+                <Text
+                  style={[
+                    styles.tabText,
+                    selectedBedrooms.includes(num) && styles.selectedTabText,
+                  ]}
+                >
+                  {num} Bed
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <CustomText style={styles.label}>Property Type</CustomText>
-        <View style={styles.tabContainer}>
-          {types.map((type) => (
-            <TouchableOpacity
-              key={type}
-              style={[
-                styles.tab,
-                selectedPropertyTypes.includes(type) && styles.selectedTab,
-              ]}
-              onPress={() =>
-                toggleSelection(
-                  type,
-                  selectedPropertyTypes,
-                  setSelectedPropertyTypes
-                )
-              }
-            >
-              <Text
+          <CustomText style={styles.label}>Bathrooms</CustomText>
+          <View style={styles.tabContainer}>
+            {bathNumbers.map((num) => (
+              <TouchableOpacity
+                key={num}
                 style={[
-                  styles.tabText,
-                  selectedPropertyTypes.includes(type) &&
-                    styles.selectedTabText,
+                  styles.tab,
+                  selectedBathrooms.includes(num) && styles.selectedTab,
                 ]}
+                onPress={() =>
+                  toggleSelection(num, selectedBathrooms, setSelectedBathrooms)
+                }
               >
-                {type}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+                <Text
+                  style={[
+                    styles.tabText,
+                    selectedBathrooms.includes(num) && styles.selectedTabText,
+                  ]}
+                >
+                  {num} Bath
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
+          <CustomText style={styles.label}>Property Type</CustomText>
+          <View style={styles.tabContainer}>
+            {types.map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={[
+                  styles.tab,
+                  selectedPropertyTypes.includes(type) && styles.selectedTab,
+                ]}
+                onPress={() =>
+                  toggleSelection(
+                    type,
+                    selectedPropertyTypes,
+                    setSelectedPropertyTypes
+                  )
+                }
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    selectedPropertyTypes.includes(type) &&
+                      styles.selectedTabText,
+                  ]}
+                >
+                  {type}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
       <View style={styles.buttonRow}>
         <TouchableOpacity
           onPress={handleApplyFilters}
@@ -184,7 +185,7 @@ const FilterScreen = ({ onApplyFilters }) => {
           <CustomText style={styles.resetButtonText}>Reset Filters</CustomText>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </>
   );
 };
 
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   selectedTab: {
-    backgroundColor: "#5A67D8",
+    backgroundColor: "#051138",
   },
   tabText: {
     color: "#333",
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   applyButton: {
-    borderColor: "#5A67D8",
+    borderColor: "#051138",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",

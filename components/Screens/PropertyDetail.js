@@ -84,8 +84,6 @@ export default function PropertyDetailScreen() {
       }).start();
     };
 
-    
-
     const desc = data.description
       .replace(/\u00A0/g, " ")
       .replace(/\s+/g, " ")
@@ -131,7 +129,10 @@ export default function PropertyDetailScreen() {
             </View>
 
             <>
-              <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom : 100}}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={{ marginBottom: 100 }}
+              >
                 <Image
                   source={require("../../assets/images/cards/image-background.png")}
                   style={styles.image}
@@ -222,22 +223,20 @@ export default function PropertyDetailScreen() {
                               key={index}
                               style={{
                                 flexDirection: "row",
-                                justifyContent: "space-between",
-                                borderWidth: 1,
+                                justifyContent: "space-around",
+                                alignItems: "center",
+
                                 padding: 10,
-                                borderColor: "#ddd",
                                 marginTop: 10,
                                 borderRadius: 10,
                               }}
                             >
                               <CustomText
-                                style={[styles.value, { width: 300 }]}
+                                style={[styles.value, { width: 150 }]}
                               >
                                 {key}:
                               </CustomText>
-                              <CustomText
-                                style={[styles.value]}
-                              >
+                              <CustomText style={[styles.value]}>
                                 {value.split("|")[0]}
                               </CustomText>
                             </View>
@@ -253,22 +252,18 @@ export default function PropertyDetailScreen() {
                               key={index}
                               style={{
                                 flexDirection: "row",
-                                justifyContent: "space-between",
-                                borderWidth: 1,
+                                justifyContent: "space-around",
                                 padding: 10,
-                                borderColor: "#ddd",
                                 marginTop: 10,
                                 borderRadius: 10,
                               }}
                             >
                               <CustomText
-                                style={[styles.value, { width: 300 }]}
+                                style={[styles.value, { width: 250 }]}
                               >
                                 {key}:
                               </CustomText>
-                              <CustomText
-                                style={[styles.value]}
-                              >
+                              <CustomText style={[styles.value]}>
                                 {value.split("|")[0]}
                               </CustomText>
                             </View>
@@ -284,22 +279,19 @@ export default function PropertyDetailScreen() {
                               key={index}
                               style={{
                                 flexDirection: "row",
-                                justifyContent: "space-between",
-                                borderWidth: 1,
+                                justifyContent: "space-around",
+
                                 padding: 10,
-                                borderColor: "#ddd",
                                 marginTop: 10,
                                 borderRadius: 10,
                               }}
                             >
                               <CustomText
-                                style={[styles.value, { width: 250 }]}
+                                style={[styles.value, { width: 150 }]}
                               >
                                 {key}:
                               </CustomText>
-                              <CustomText
-                                style={[styles.value]}
-                              >
+                              <CustomText style={[styles.value]}>
                                 {value.split("|")[0]}
                               </CustomText>
                             </View>
@@ -309,16 +301,8 @@ export default function PropertyDetailScreen() {
                     )}
                   </ScrollView>
 
-                  <View style={styles.section}>
-                    <CustomText style={styles.sectionTitle}>
-                      Location
-                    </CustomText>
-                    <MapView style={styles.map} initialRegion={region} />
-
-
-                  </View>
                   <View>
-                    <CustomTextBold style={{ fontSize: 25 }}>
+                    <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
                       Laundry
                     </CustomTextBold>
                   </View>
@@ -329,73 +313,64 @@ export default function PropertyDetailScreen() {
                         key={index}
                         style={{
                           flexDirection: "row",
-                          justifyContent: "space-between",
-                          borderWidth: 1,
-                          padding: 10,
-                          borderColor: "#ddd",
-                          marginTop: 10,
-                          borderRadius: 10,
-                        }}
-                      >
-                        <CustomText
-                          style={[styles.value, { width: 250 }]}
-                        >
-                          {key}:
-                        </CustomText>
-                        <CustomText
-                          style={[styles.value]}
-                        >
-                          {value.split("|")[0]}
-                        </CustomText>
-                      </View>
-                    )
-                  )}
-                  
-                  {data.details.neighborhood_amenities &&
-                  <>
-                  <View>
-                    <CustomTextBold style={{ fontSize: 25 }}>
-                      Amenities
-                    </CustomTextBold>
-                  </View>
+                          justifyContent: "space-around",
 
-                  {Object.entries(data.details.neighborhood_amenities || {}).map(
-                    ([key, value], index) => (
-                      <View
-                        key={index}
-                        style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          borderWidth: 1,
                           padding: 10,
-                          borderColor: "#ddd",
                           marginTop: 10,
                           borderRadius: 10,
                         }}
                       >
-                        <CustomText
-                          style={[styles.value, { width: 250 }]}
-                        >
+                        <CustomText style={[styles.value, { width: 150 }]}>
                           {key}:
                         </CustomText>
-                        <CustomText
-                          style={[styles.value]}
-                        >
+                        <CustomText style={[styles.value]}>
                           {value.split("|")[0]}
                         </CustomText>
                       </View>
                     )
                   )}
 
-                  </>
- 
-}
+                  {data.details.neighborhood_amenities && (
+                    <>
+                      <View>
+                        <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
+                          Amenities
+                        </CustomTextBold>
+                      </View>
 
+                      {Object.entries(
+                        data.details.neighborhood_amenities || {}
+                      ).map(([key, value], index) => (
+                        <View
+                          key={index}
+                          style={{
+                            flexDirection: "row",
+                            justifyContent: "space-around",
+
+                            padding: 10,
+                            marginTop: 10,
+                            borderRadius: 10,
+                          }}
+                        >
+                          <CustomText style={[styles.value, { width: 150 }]}>
+                            {key}:
+                          </CustomText>
+                          <CustomText style={[styles.value]}>
+                            {value.split("|")[0]}
+                          </CustomText>
+                        </View>
+                      ))}
+                    </>
+                  )}
                 </View>
 
+                <View style={styles.section}>
+                  <CustomTextBold style={styles.sectionTitle}>
+                    Location
+                  </CustomTextBold>
+                  <MapView style={styles.map} initialRegion={region} />
+                </View>
               </ScrollView>
-
-
 
               <View style={styles.footerFixed}>
                 <TouchableOpacity
@@ -459,10 +434,10 @@ const styles = StyleSheet.create({
   ownerAvatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
   ownerName: { fontWeight: "bold", color: "#1F1D5B" },
   ownerRole: { fontSize: 12, color: "#888" },
-  section: { marginBottom: 24 },
+  section: { marginBottom: 24, marginHorizontal: 20 },
   sectionTitle: {
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: 25,
     color: "black",
     marginBottom: 8,
     marginTop: 10,
@@ -502,7 +477,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     width: 350,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   contactText: { color: "#fff", fontWeight: "600" },
   footerFixed: {
@@ -640,24 +615,20 @@ const ToggleScreen = ({ active, setActive }) => {
             },
           ]}
         />
-        {["Kitchen", "Bathroom", "Appliances"].map(
-          (label, index) => (
-            <Pressable
-              key={index}
-              style={styles.toggleButton}
-              onPress={() => handlePress(index)}
+        {["Kitchen", "Bathroom", "Appliances"].map((label, index) => (
+          <Pressable
+            key={index}
+            style={styles.toggleButton}
+            onPress={() => handlePress(index)}
+          >
+            <CustomText
+              style={[styles.text, active === index && styles.activeText]}
             >
-              <CustomText
-                style={[styles.text, active === index && styles.activeText]}
-              >
-                {label}
-              </CustomText>
-            </Pressable>
-          )
-        )}
+              {label}
+            </CustomText>
+          </Pressable>
+        ))}
       </View>
     </View>
   );
 };
-
-

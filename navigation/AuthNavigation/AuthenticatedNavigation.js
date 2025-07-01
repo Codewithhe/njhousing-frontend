@@ -16,6 +16,8 @@ import DrawerNavigator from "../drawer/navigtor";
 import SeacrResults from "../../components/Screens/SearchResults";
 import StripeCheckoutButton from "../../components/Payment/paymenrButton";
 import Splashone from "../../components/Screens/SplashScreens/Splashone";
+import Faq from "../../components/Screens/Faq/screen";
+import Terms from "../../components/Screens/TermsAndConditions/screen";
 
 const RootStack = createStackNavigator();
 
@@ -164,6 +166,17 @@ const AuthRootStackNavigator = () => {
         name="Payment"
         options={{ headerShown: true, headerTitle: "" }}
         component={StripeCheckoutButton}
+      ></RootStack.Screen>
+
+      <RootStack.Screen
+        name="Faq"
+        options={{ headerShown: true, headerTitle: "" }}
+        component={Faq}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="Terms"
+        options={{ headerShown: true, headerTitle: "" }}
+        component={Terms}
       ></RootStack.Screen>
     </RootStack.Navigator>
   );

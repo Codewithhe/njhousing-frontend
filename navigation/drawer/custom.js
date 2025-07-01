@@ -9,6 +9,7 @@ import {
   MaterialIcons,
 } from "react-native-vector-icons";
 import { useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
 const drawerItems = [
   {
@@ -53,7 +54,13 @@ const drawerItems = [
     id: "help",
     icon: <Entypo name="help-with-circle" size={18} color="#951627" />,
     label: "Help & FAQs",
-    screen: "HelpScreen",
+    screen: "Faq",
+  },
+  {
+    id: "tandc",
+    icon: <AntDesign name="home" size={18} color="#951627" />,
+    label: "Terms and Conditions",
+    screen: "Terms",
   },
   // Optional - conditionally render this for free users only
   {
@@ -108,14 +115,19 @@ const drawerItemsPre = [
     id: "help",
     icon: <Entypo name="help-with-circle" size={18} color="#951627" />,
     label: "Help & FAQs",
-    screen: "HelpScreen",
+    screen: "Faq",
   },
-  // Optional - conditionally render this for free users only
+  {
+    id: "tandc",
+    icon: <AntDesign name="home" size={18} color="#951627" />,
+    label: "Terms and Conditions",
+    screen: "Terms",
+  },
 ];
 
 const CustomDrawer = (props) => {
   const user = useSelector((state) => state.user);
-
+  const navigation = useNavigation();
   const drawer =
     user.user.premiumEnabled === true ? drawerItemsPre : drawerItems;
   return (
@@ -136,6 +148,8 @@ const CustomDrawer = (props) => {
                 label={item.label}
                 icon={({ color, size }) => item.icon}
                 labelStyle={styles.drawerLabel}
+                // onPress={() => console.log(item.navigation)}
+                onPress={() => navigation.navigate(item.screen)}
               />
             </View>
           ))}

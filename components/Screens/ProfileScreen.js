@@ -35,7 +35,9 @@ const ProfileScreen = () => {
     { label: "Membership: Free", icon: "staro", action: "upgrade" }, // You can change the label dynamically
     { label: "Auto-apply for me", icon: "checkcircleo", isToggle: true },
     { label: "Address / Phone / Password", icon: "setting" },
-    { label: "FAQs", icon: "questioncircleo" },
+    { label: "FAQs", icon: "questioncircleo", screem:"Faq" },
+    { label: "Terms and Conditions", icon: "questioncircleo", screem:"Faq" },
+
   ];
 
   return (
