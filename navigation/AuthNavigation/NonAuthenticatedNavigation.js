@@ -168,6 +168,16 @@ const RootStackNavigator = () => {
         options={{ headerShown: true, headerTitle: "" }}
         component={SeacrResults}
       ></RootStack.Screen>
+      <RootStack.Screen
+        name="Faq"
+        options={{ headerShown: true, headerTitle: "" }}
+        component={Faq}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="Terms"
+        options={{ headerShown: true, headerTitle: "" }}
+        component={Terms}
+      ></RootStack.Screen>
     </RootStack.Navigator>
   );
 };

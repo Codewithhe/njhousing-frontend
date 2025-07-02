@@ -91,6 +91,7 @@ export default function PropertyDetailScreen() {
     const cleanedStrig = desc.split("•").map((part) => part.trim());
     const tabs = ["Kitchen", "Utilities", "Appliances"];
     const tableKeys = ["table_10", "table_7", "table_6"];
+    const user = useSelector((state) => state.user);
 
     return (
       <>
@@ -137,19 +138,38 @@ export default function PropertyDetailScreen() {
                   source={require("../../assets/images/cards/image-background.png")}
                   style={styles.image}
                 />
-                <TouchableOpacity
-                  style={styles.videoButton}
-                  onPress={() =>
-                    navigation.navigate("Subscriptions", {
-                      title: data.title,
-                      address: data.address,
-                    })
-                  }
-                >
-                  <CustomText style={styles.videoButtonText}>
-                    Subscribe
-                  </CustomText>
-                </TouchableOpacity>
+
+                {user.user.premiumEnabled === true ? (
+                  <TouchableOpacity
+                    style={styles.contactButton}
+                    onPress={() =>
+                      navigation.navigate("Root", {
+                        screen: "Tabs",
+                        params: {
+                          screen: "Lottery",
+                        },
+                      })
+                    }
+                  >
+                    <CustomText style={styles.contactText}>Lottery</CustomText>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.contactButton}
+                    onPress={() =>
+                      navigation.navigate("Root", {
+                        screen: "Tabs",
+                        params: {
+                          screen: "Subscriptions",
+                        },
+                      })
+                    }
+                  >
+                    <CustomText style={styles.contactText}>
+                      Subscribe
+                    </CustomText>
+                  </TouchableOpacity>
+                )}
                 <View style={styles.content}>
                   <View
                     style={{
@@ -209,97 +229,97 @@ export default function PropertyDetailScreen() {
                     </View>
                   </View>
 
-                  {/* Tabs */}
-                  <View style={styles.tabRow}>
-                    <ToggleScreen active={active} setActive={setActive} />
+                  <View>
+                    <View style={{ marginTop: 20, margin: 10 }}>
+                      <>
+                        <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
+                          Kitchen
+                        </CustomTextBold>
+                      </>
+                      {Object.entries(data.details.kitchen).map(
+                        ([key, value], index) => (
+                          <View
+                            key={index}
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+
+                              padding: 10,
+                              marginTop: 10,
+                              borderRadius: 10,
+                            }}
+                          >
+                            <CustomText style={[styles.value, { width: 150 }]}>
+                              {key}:
+                            </CustomText>
+                            <CustomText style={[styles.value]}>
+                              {value.split("|")[0]}
+                            </CustomText>
+                          </View>
+                        )
+                      )}
+                    </View>
+                    <View style={{ marginTop: 20 }}>
+                      <>
+                        <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
+                          Bathroom
+                        </CustomTextBold>
+                      </>
+
+                      {Object.entries(data.details.bathroom).map(
+                        ([key, value], index) => (
+                          <View
+                            key={index}
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              padding: 10,
+                              marginTop: 10,
+                              borderRadius: 10,
+                            }}
+                          >
+                            <CustomText style={[styles.value, { width: 250 }]}>
+                              {key}:
+                            </CustomText>
+                            <CustomText style={[styles.value]}>
+                              {value.split("|")[0]}
+                            </CustomText>
+                          </View>
+                        )
+                      )}
+                    </View>
+                    <View style={{ marginTop: 20 }}>
+                      <>
+                        <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
+                          Appliances
+                        </CustomTextBold>
+                      </>
+
+                      {Object.entries(data.details.appliances).map(
+                        ([key, value], index) => (
+                          <View
+                            key={index}
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+
+                              padding: 10,
+                              marginTop: 10,
+                              borderRadius: 10,
+                            }}
+                          >
+                            <CustomText style={[styles.value, { width: 150 }]}>
+                              {key}:
+                            </CustomText>
+                            <CustomText style={[styles.value]}>
+                              {value.split("|")[0]}
+                            </CustomText>
+                          </View>
+                        )
+                      )}
+                    </View>
                   </View>
-
-                  <ScrollView horizontal={true}>
-                    {active === 0 && (
-                      <View style={{ marginTop: 20, margin: 10 }}>
-                        {Object.entries(data.details.kitchen).map(
-                          ([key, value], index) => (
-                            <View
-                              key={index}
-                              style={{
-                                flexDirection: "row",
-                                justifyContent: "space-around",
-                                alignItems: "center",
-
-                                padding: 10,
-                                marginTop: 10,
-                                borderRadius: 10,
-                              }}
-                            >
-                              <CustomText
-                                style={[styles.value, { width: 150 }]}
-                              >
-                                {key}:
-                              </CustomText>
-                              <CustomText style={[styles.value]}>
-                                {value.split("|")[0]}
-                              </CustomText>
-                            </View>
-                          )
-                        )}
-                      </View>
-                    )}
-                    {active === 1 && (
-                      <View style={{ marginTop: 20 }}>
-                        {Object.entries(data.details.bathroom).map(
-                          ([key, value], index) => (
-                            <View
-                              key={index}
-                              style={{
-                                flexDirection: "row",
-                                justifyContent: "space-around",
-                                padding: 10,
-                                marginTop: 10,
-                                borderRadius: 10,
-                              }}
-                            >
-                              <CustomText
-                                style={[styles.value, { width: 250 }]}
-                              >
-                                {key}:
-                              </CustomText>
-                              <CustomText style={[styles.value]}>
-                                {value.split("|")[0]}
-                              </CustomText>
-                            </View>
-                          )
-                        )}
-                      </View>
-                    )}
-                    {active === 2 && (
-                      <View style={{ marginTop: 20 }}>
-                        {Object.entries(data.details.appliances).map(
-                          ([key, value], index) => (
-                            <View
-                              key={index}
-                              style={{
-                                flexDirection: "row",
-                                justifyContent: "space-around",
-
-                                padding: 10,
-                                marginTop: 10,
-                                borderRadius: 10,
-                              }}
-                            >
-                              <CustomText
-                                style={[styles.value, { width: 150 }]}
-                              >
-                                {key}:
-                              </CustomText>
-                              <CustomText style={[styles.value]}>
-                                {value.split("|")[0]}
-                              </CustomText>
-                            </View>
-                          )
-                        )}
-                      </View>
-                    )}
-                  </ScrollView>
 
                   <View>
                     <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
@@ -313,7 +333,7 @@ export default function PropertyDetailScreen() {
                         key={index}
                         style={{
                           flexDirection: "row",
-                          justifyContent: "space-around",
+                          justifyContent: "space-between",
 
                           padding: 10,
                           marginTop: 10,
@@ -373,19 +393,37 @@ export default function PropertyDetailScreen() {
               </ScrollView>
 
               <View style={styles.footerFixed}>
-                <TouchableOpacity
-                  style={styles.contactButton}
-                  onPress={() =>
-                    navigation.navigate("Root", {
-                      screen: "Tabs",
-                      params: {
-                        screen: "Subscriptions",
-                      },
-                    })
-                  }
-                >
-                  <CustomText style={styles.contactText}>Subscribe</CustomText>
-                </TouchableOpacity>
+                {user.user.premiumEnabled === true ? (
+                  <TouchableOpacity
+                    style={styles.contactButton}
+                    onPress={() =>
+                      navigation.navigate("Root", {
+                        screen: "Tabs",
+                        params: {
+                          screen: "Lottery",
+                        },
+                      })
+                    }
+                  >
+                    <CustomText style={styles.contactText}>Lottery</CustomText>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.contactButton}
+                    onPress={() =>
+                      navigation.navigate("Root", {
+                        screen: "Tabs",
+                        params: {
+                          screen: "Subscriptions",
+                        },
+                      })
+                    }
+                  >
+                    <CustomText style={styles.contactText}>
+                      Subscribe
+                    </CustomText>
+                  </TouchableOpacity>
+                )}
               </View>
             </>
           </View>

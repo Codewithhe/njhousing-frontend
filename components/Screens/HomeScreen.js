@@ -65,8 +65,6 @@ const HomeScreen = () => {
   //   return true;
   // };
 
-  console.log(user.user.premiumEnabled);
-
   return (
     <>
       <SafeAreaView style={{ flex: 1 }}>

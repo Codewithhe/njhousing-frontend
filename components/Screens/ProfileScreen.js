@@ -35,9 +35,8 @@ const ProfileScreen = () => {
     { label: "Membership: Free", icon: "staro", action: "upgrade" }, // You can change the label dynamically
     { label: "Auto-apply for me", icon: "checkcircleo", isToggle: true },
     { label: "Address / Phone / Password", icon: "setting" },
-    { label: "FAQs", icon: "questioncircleo", screem:"Faq" },
-    { label: "Terms and Conditions", icon: "questioncircleo", screem:"Faq" },
-
+    { label: "FAQs", icon: "questioncircleo", screen: "Faq" },
+    { label: "Terms and Conditions", icon: "questioncircleo", screen: "Terms" },
   ];
 
   return (
@@ -56,7 +55,10 @@ const ProfileScreen = () => {
           {profileOptions.map((item, index) => (
             <View key={index} style={styles.optionRow}>
               <View style={styles.optionLeft}>
-                <View style={styles.iconBox}>
+                <View
+                  style={styles.iconBox}
+                  onPress={() => navigation.navigate(item.screen)}
+                >
                   <AntDesign name={item.icon} size={20} color={"black"} />
                 </View>
                 <Text style={styles.optionLabel}>{item.label}</Text>

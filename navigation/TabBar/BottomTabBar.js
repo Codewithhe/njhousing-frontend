@@ -43,9 +43,8 @@ const getTabBarIcon = (focused, activeIcon, inactiveIcon, label) => (
 );
 
 export default function MyTabs() {
+  const user = useSelector((state) => state.user.loggedIn);
 
-  const  user  = useSelector((state) =>  state.user.loggedIn)
-  
   return (
     <Tab.Navigator
       screenOptions={{
@@ -74,38 +73,32 @@ export default function MyTabs() {
         }}
       />
 
-      {user ===  true ? 
-     <Tab.Screen
-      name="Lottery"
-      component={LotteryScreen}
-      options={{
-        tabBarIcon: ({ focused }) =>
-          getTabBarIcon(
-            focused,
-            LotteryActive,
-            Lottery,
-            "Lottery"
-          ),
-        }}
-      />
-    
-    :
+      {user === true ? (
+        <Tab.Screen
+          name="Lottery"
+          component={LotteryScreen}
+          options={{
+            tabBarIcon: ({ focused }) =>
+              getTabBarIcon(focused, LotteryActive, Lottery, "Lottery"),
+          }}
+        />
+      ) : (
+        <Tab.Screen
+          name="Subscription"
+          component={SubscriptionScreen}
+          options={{
+            tabBarIcon: ({ focused }) =>
+              getTabBarIcon(
+                focused,
+                SubscriptionActive,
+                Subscription,
+                "Subscription"
+              ),
+          }}
+        />
+      )}
       <Tab.Screen
-      name="Subscription"
-      component={SubscriptionScreen}
-      options={{
-        tabBarIcon: ({ focused }) =>
-          getTabBarIcon(
-            focused,
-            SubscriptionActive,
-            Subscription,
-            "Subscription"
-          ),
-        }}
-      />
-    }
-      <Tab.Screen
-      name="Profile"
+        name="Profile"
         component={ProfileScreen}
         options={{
           tabBarIcon: ({ focused }) =>

@@ -7,6 +7,7 @@ import {
   Entypo,
   Ionicons,
   MaterialIcons,
+  Foundation,
 } from "react-native-vector-icons";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
@@ -58,7 +59,7 @@ const drawerItems = [
   },
   {
     id: "tandc",
-    icon: <AntDesign name="home" size={18} color="#951627" />,
+    icon: <Foundation name="clipboard-notes" size={18} color="#951627" />,
     label: "Terms and Conditions",
     screen: "Terms",
   },
@@ -119,7 +120,7 @@ const drawerItemsPre = [
   },
   {
     id: "tandc",
-    icon: <AntDesign name="home" size={18} color="#951627" />,
+    icon: <Foundation name="clipboard-notes" size={18} color="#951627" />,
     label: "Terms and Conditions",
     screen: "Terms",
   },
