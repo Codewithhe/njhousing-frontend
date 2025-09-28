@@ -8,7 +8,7 @@ import { HOST } from "../../utils/static";
 
 const StripeCheckoutButton = () => {
   const route = useRoute();
-  const {user} = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
 
   const { name, amount } = route.params;
   const [checkoutUrl, setCheckoutUrl] = useState("");
@@ -56,8 +56,6 @@ const StripeCheckoutButton = () => {
     []
   );
 
-  console.log(user)
-
   if (checkoutUrl) {
     return (
       <WebView
@@ -67,8 +65,8 @@ const StripeCheckoutButton = () => {
         domStorageEnabled
         onNavigationStateChange={(navState) => {
           if (navState.url === "https://simfys.com/success") {
-            const request = {plan :name}
-            updateSubscription(request , user._id, navigation)
+            const request = { plan: name };
+            updateSubscription(request, user._id, navigation);
           }
         }}
       />

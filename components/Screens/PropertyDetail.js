@@ -30,28 +30,22 @@ import MapView, { Marker } from "react-native-maps";
 import CustomText from "../common/Text";
 import { fetchpropdetails } from "../../utils/apicalls/fetchbytitle";
 import CustomTextBold from "../common/BoldCustomtext";
+import { useSelector } from "react-redux";
 
 const { width } = Dimensions.get("window");
 
 export default function PropertyDetailScreen() {
+  const user = useSelector((state) => state.user);
   const route = useRoute();
   const { id } = route.params;
   const navigation = useNavigation();
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState([]);
+
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    fetchpropdetails(setData, id);
-    async function loadFonts() {
-      await Font.loadAsync({
-        "Hind-Jalandhar": require("../../assets/fonts/Hind/Hind-Regular.ttf"),
-        "Hind-Jalandhar-Bold": require("../../assets/fonts/Hind/Hind-Bold.ttf"),
-        "Hind-Jalandhar": require("../../assets/fonts/Hind/Hind-Light.ttf"),
-        "Hind-Jalandhar": require("../../assets/fonts/Hind/Hind-Medium.ttf"),
-      });
-      setFontsLoaded(true);
-    }
-    loadFonts();
+    fetchpropdetails(setData, id, setLoading);
   }, []);
 
   const region = {
@@ -91,7 +85,6 @@ export default function PropertyDetailScreen() {
     const cleanedStrig = desc.split("•").map((part) => part.trim());
     const tabs = ["Kitchen", "Utilities", "Appliances"];
     const tableKeys = ["table_10", "table_7", "table_6"];
-    const user = useSelector((state) => state.user);
 
     return (
       <>
@@ -135,13 +128,13 @@ export default function PropertyDetailScreen() {
                 style={{ marginBottom: 100 }}
               >
                 <Image
-                  source={require("../../assets/images/cards/image-background.png")}
+                  source={require("../../assets/images/cards/image_background.png")}
                   style={styles.image}
                 />
 
                 {user.user.premiumEnabled === true ? (
                   <TouchableOpacity
-                    style={styles.contactButton}
+                    style={styles.videoButton}
                     onPress={() =>
                       navigation.navigate("Root", {
                         screen: "Tabs",
@@ -151,11 +144,13 @@ export default function PropertyDetailScreen() {
                       })
                     }
                   >
-                    <CustomText style={styles.contactText}>Lottery</CustomText>
+                    <CustomText style={styles.videoButtonText}>
+                      Lottery
+                    </CustomText>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
-                    style={styles.contactButton}
+                    style={styles.videoButton}
                     onPress={() =>
                       navigation.navigate("Root", {
                         screen: "Tabs",
@@ -165,7 +160,7 @@ export default function PropertyDetailScreen() {
                       })
                     }
                   >
-                    <CustomText style={styles.contactText}>
+                    <CustomText style={styles.videoButtonText}>
                       Subscribe
                     </CustomText>
                   </TouchableOpacity>
@@ -432,9 +427,9 @@ export default function PropertyDetailScreen() {
     );
   } else {
     return (
-      <>
+      <View style={{ flex: 1 }}>
         <ActivityIndicator size="small" color="#917AFD" />
-      </>
+      </View>
     );
   }
 }

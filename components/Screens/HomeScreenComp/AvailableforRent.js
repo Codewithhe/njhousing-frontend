@@ -12,11 +12,12 @@ import { ScrollView } from "react-native";
 import { Button, Paragraph } from "react-native-paper";
 import InternationalMigrations from "../../cards/DestinationCards";
 import { useNavigation } from "@react-navigation/native";
-import states from "../../../utils/County.json";
 import { fetchallcounty } from "../../../utils/apicalls/fetchallcounty";
 import CustomText from "../../common/Text";
 import CustomTextBold from "../../common/BoldCustomtext";
+
 const height = Dimensions.get("window").height;
+
 const AvailableforRent = () => {
   const navigation = useNavigation();
   const [data, setData] = useState([]);
@@ -74,7 +75,7 @@ const AvailableforRent = () => {
               })
             ) : (
               <View style={{ justifyContent: "center", alignItems: "center" }}>
-                <ActivityIndicator size="large" color="#917AFD" />{" "}
+                <ActivityIndicator size="large" color="#917AFD" />
               </View>
             )}
           </ScrollView>
@@ -137,5 +138,3 @@ const AvailableforRent = () => {
 };
 
 export default AvailableforRent;
-
-const styles = StyleSheet.create({});

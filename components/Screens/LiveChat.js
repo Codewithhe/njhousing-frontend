@@ -8,7 +8,6 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 
 const sampleMessages = [
   {
@@ -98,7 +97,7 @@ const LiveChat = () => {
           onPress={sendMessage}
           style={[styles.sendButton, { marginRight: 10 }]}
         >
-          <AntDesign name="pluscircleo" size={24} color="white" />
+          {/* <AntDesign name="pluscircleo" size={24} color="white" /> */}
         </TouchableOpacity>
         <TextInput
           style={styles.textInput}
@@ -107,7 +106,7 @@ const LiveChat = () => {
           onChangeText={setNewMessage}
         />
         <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-          <MaterialCommunityIcons name="send" size={24} color="white" />
+          {/* <MaterialCommunityIcons name="send" size={24} color="white" /> */}
         </TouchableOpacity>
       </View>
     </SafeAreaView>

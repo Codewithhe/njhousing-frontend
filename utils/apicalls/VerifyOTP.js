@@ -2,8 +2,15 @@ import axios from "axios";
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { HOST } from "../static";
+import { setUser } from "../../redux/slices/user";
 
-export const handleVerify = async (email, otp, navigation, setLoading) => {
+export const handleVerify = async (
+  email,
+  otp,
+  navigation,
+  setLoading,
+  dispatch
+) => {
   setLoading(true);
 
   if (!otp.trim()) {
@@ -17,12 +24,12 @@ export const handleVerify = async (email, otp, navigation, setLoading) => {
       email,
       otp,
     });
-
+    console.log(response);
     if (response.status === 200) {
       // Save authenticated flag or token to AsyncStorage
       await AsyncStorage.setItem("isAuthenticated", "true");
       await AsyncStorage.setItem("userEmail", email);
-
+      dispatch(setUser(response.data.user));
       Alert.alert("Success", response.data.message);
       setLoading(false);
 

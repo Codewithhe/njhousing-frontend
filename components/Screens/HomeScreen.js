@@ -18,7 +18,7 @@ import AvailableforRent from "./HomeScreenComp/AvailableforRent";
 
 import CustomText from "../common/Text";
 import { useSelector } from "react-redux";
-import Premium from "../../assets/images/background/premium.png";
+// import Premium from "../../assets/images/background/premium.png";
 
 const { width } = Dimensions.get("window");
 
@@ -28,6 +28,7 @@ const HomeScreen = () => {
   const [active, setActive] = useState("I need to rent");
   const translateX = useRef(new Animated.Value(0)).current;
   const indicatorX = useRef(new Animated.Value(0)).current;
+
   // const handleTabPress = (tab, index) => {
   //   setActive(tab);
 
@@ -95,27 +96,23 @@ const HomeScreen = () => {
               borderBottomRightRadius: 20,
             }}
           >
-            <LocationHeader image={user.user.premiumEnabled} />
+            <LocationHeader image={user?.user?.premiumEnabled} />
 
             <SearchBar />
             <CustomText
               style={{
-                color: "white",
                 fontSize: 20,
+                color: "white",
                 marginVertical: 11,
-                paddingHorizontal: 10,
                 textAlign: "center",
+                paddingHorizontal: 10,
               }}
             >
               Welcome to Affordable NJ Housing
             </CustomText>
           </LinearGradient>
 
-          <View
-            style={{
-              paddingHorizontal: 10,
-            }}
-          >
+          <View style={{ paddingHorizontal: 10 }}>
             <AvailableforRent />
           </View>
         </ScrollView>

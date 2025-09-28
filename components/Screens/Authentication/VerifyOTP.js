@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { handleVerify } from "../../../utils/apicalls/VerifyOTP";
+import { useDispatch } from "react-redux";
 
 const VerifyOTPScreen = () => {
   const route = useRoute();
@@ -20,7 +21,7 @@ const VerifyOTPScreen = () => {
   const navigation = useNavigation();
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const dispatch = useDispatch();
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -54,7 +55,9 @@ const VerifyOTPScreen = () => {
 
         <TouchableOpacity
           style={styles.submitButton}
-          onPress={() => handleVerify(email, otp, navigation, setLoading)}
+          onPress={() =>
+            handleVerify(email, otp, navigation, setLoading, dispatch)
+          }
         >
           {loading ? (
             <ActivityIndicator size="small" color="#fff" />
@@ -131,7 +134,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   submitButton: {
-    backgroundColor: "#3E5BF5",
+    backgroundColor: "#1F1D5B",
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: "center",

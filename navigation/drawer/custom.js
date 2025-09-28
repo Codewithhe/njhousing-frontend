@@ -130,7 +130,7 @@ const CustomDrawer = (props) => {
   const user = useSelector((state) => state.user);
   const navigation = useNavigation();
   const drawer =
-    user.user.premiumEnabled === true ? drawerItemsPre : drawerItems;
+    user?.user?.premiumEnabled === true ? drawerItemsPre : drawerItems;
   return (
     <DrawerContentScrollView
       {...props}

@@ -92,7 +92,6 @@ const Propertlistings = () => {
     });
 
     bathrooms.forEach((element) => {
-      console.log(element);
       var bathro = data.filter((item) => element == item.bathrooms);
 
       setFilteredData(bathro);

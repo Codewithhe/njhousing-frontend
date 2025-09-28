@@ -1,10 +1,6 @@
 "use client";
-import React, { useEffect } from "react";
 import RootStackNavigator from "./navigation/AuthNavigation/NonAuthenticatedNavigation";
-
-import { SafeAreaView } from "react-native-safe-area-context";
 import { View, StatusBar } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthRootStackNavigator from "./navigation/AuthNavigation/AuthenticatedNavigation";
 import { useSelector } from "react-redux";
 

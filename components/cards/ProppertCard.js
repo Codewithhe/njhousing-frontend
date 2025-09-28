@@ -16,6 +16,7 @@ import {
   AntDesign,
 } from "@expo/vector-icons";
 import CustomText from "../common/Text";
+import { HOST } from "../../utils/static";
 
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
@@ -43,15 +44,19 @@ const PropertyCard = ({
   };
 
   const randomRating = useMemo(() => getRandomRating(), []);
-
   return (
     <Pressable onPress={onPress}>
       <View style={styles.card}>
         <View style={styles.imageContainer}>
-          <Image
-            source={require("../../assets/images/cards/image-background.png")}
-            style={styles.image}
-          />
+          {image === "N/A" ? (
+            <Image
+              source={{ uri: `${HOST}resources/${image}` }}
+              style={styles.image}
+            />
+          ) : image ===
+            "https://www.myhousingsearch.com/graphics/images/grayNoPics.png" ? (
+            <Image source={{ uri: image }} style={styles.image} />
+          ) : null}
 
           <View style={styles.typeBadge}>
             <Text style={styles.typeText}>{cleanedStrig[2]}</Text>

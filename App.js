@@ -1,11 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import Main from "./Main";
 import { useFonts } from "expo-font";
-import AppLoading from "expo-app-loading"; // Optional fallback
+import * as SplashScreen from "expo-splash-screen"; // modern replacement
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor, store } from "./redux/store";
+
+// Keep the splash visible until fonts are loaded
+SplashScreen.preventAutoHideAsync();
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -14,16 +17,26 @@ const App = () => {
     "Poppins-Light": require("./assets/fonts/Poppins/Poppins-Light.ttf"),
     "Poppins-Semi": require("./assets/fonts/Poppins/Poppins-SemiBold.ttf"),
   });
+  useEffect(() => {
+    setTimeout(async () => {
+      SplashScreen.hideAsync();
+    }, 1000);
+  }, []);
 
-  if (!fontsLoaded) {
-    return <AppLoading />; // or a loading spinner
-  }
+  // Hide splash when fonts are ready
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      setTimeout(async () => {
+        SplashScreen.hideAsync();
+      }, 1000);
+    }
+  }, [fontsLoaded]);
 
   return (
     <NavigationContainer>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <Main />
+          <Main onLayout={onLayoutRootView} />
         </PersistGate>
       </Provider>
     </NavigationContainer>

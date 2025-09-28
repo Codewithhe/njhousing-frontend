@@ -44,7 +44,9 @@ const getTabBarIcon = (focused, activeIcon, inactiveIcon, label) => (
 
 export default function MyTabs() {
   const user = useSelector((state) => state.user.loggedIn);
+  const userPremium = useSelector((state) => state.user.premiumEnabled);
 
+  console.log(userPremium);
   return (
     <Tab.Navigator
       screenOptions={{
@@ -73,7 +75,7 @@ export default function MyTabs() {
         }}
       />
 
-      {user === true ? (
+      {userPremium === true ? (
         <Tab.Screen
           name="Lottery"
           component={LotteryScreen}

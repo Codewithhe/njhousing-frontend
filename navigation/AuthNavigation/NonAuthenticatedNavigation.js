@@ -17,6 +17,8 @@ import DrawerNavigator from "../drawer/navigtor";
 import Splashone from "../../components/Screens/SplashScreens/Splashone";
 import Splashtwo from "../../components/Screens/SplashScreens/Splashtwo";
 import Splashthree from "../../components/Screens/SplashScreens/Splashthree";
+import Faq from "../../components/Screens/Faq/screen";
+import Terms from "../../components/Screens/TermsAndConditions/screen";
 
 const RootStack = createStackNavigator();
 
@@ -38,11 +40,13 @@ const RootStackNavigator = () => {
         options={{ headerShown: false, headerTitle: "" }}
         component={Splashone}
       ></RootStack.Screen>
+
       <RootStack.Screen
         name="Splashtwo"
         options={{ headerShown: false, headerTitle: "" }}
         component={Splashtwo}
       ></RootStack.Screen>
+
       <RootStack.Screen
         name="Splashthree"
         options={{ headerShown: false, headerTitle: "" }}

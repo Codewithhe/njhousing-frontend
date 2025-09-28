@@ -86,12 +86,6 @@ const LocationHeader = ({ image }) => {
               alignItems: "center",
             }}
           >
-            <View>
-              <CustomTextBold style={{ color: "white" }}>
-                Premium
-              </CustomTextBold>
-              <CustomTextBold style={{ color: "white" }}>Member</CustomTextBold>
-            </View>
             <EvilIcons name="user" size={50} color={"white"} />
           </Pressable>
         )}

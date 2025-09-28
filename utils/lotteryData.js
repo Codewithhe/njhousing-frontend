@@ -1,0 +1,40 @@
+export const lotteryData = [
+  {
+    id: "1",
+    title: "The One Apartments",
+    location: "110 1st Street, Jersey City, NJ",
+    image: require("../assets/images/cards/card_one.jpg"),
+    units: 2,
+    size: "723 sq. ft.",
+    bedroom: 1,
+    bathroom: 1,
+    maxHousehold: 3,
+    incomeLimits: [
+      {
+        ami: "50%",
+        rent: "$753 - $1,255",
+        minIncome: "$28,110",
+        maxIncome: "$60,249",
+      },
+      {
+        ami: "80%",
+        rent: "$1,255 - $2,008",
+        minIncome: "$46,850",
+        maxIncome: "$96,400",
+      },
+    ],
+    applicationPeriod: "April 15, 2025 to May 15, 2025",
+    drawingDate: "May 30, 2025 (11 am)",
+    occupancy: "No later than June 1",
+    preferences: ["Jersey City resident", "Veteran"],
+    utilityCredit: "$121",
+    amenities: [
+      "Outdoor pool",
+      "Community room",
+      "24h lobby",
+      "Cold grocery storage",
+      "Live-in super",
+    ],
+    howToApply: "Visit front desk or apply online at affordablehousingjc.com",
+  },
+];

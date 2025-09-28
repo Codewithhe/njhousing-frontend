@@ -10,13 +10,11 @@ import {
   Dimensions,
   ActivityIndicator,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // You can use this with Expo
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import user from "../../../utils/user.json";
 import { loginApi } from "../../../utils/apicalls/loginApi";
 import { Button } from "react-native-paper";
 import CustomText from "../../common/Text";
-import CustomTextBold from "../../common/BoldCustomtext";
 import CustomTextSemi from "../../common/CustomTextSemi";
 import { useDispatch, useSelector } from "react-redux";
 import CustomLogo from "../../CustomLogo";
@@ -154,7 +152,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F2F2F2",
     borderRadius: 8,
     paddingHorizontal: 14,
-    // paddingVertical: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
