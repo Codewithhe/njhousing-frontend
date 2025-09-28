@@ -70,7 +70,7 @@ const HomeScreen = () => {
     <>
       <SafeAreaView style={{ flex: 1 }}>
         <StatusBar barStyle="dark-content" backgroundColor="white" />
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
           <Image
             source={require("../../assets/images/background/picnic.png")}
             style={{
@@ -83,6 +83,7 @@ const HomeScreen = () => {
               opacity: 0.8,
             }}
             resizeMode="contain"
+            pointerEvents="none"
           />
 
           <LinearGradient

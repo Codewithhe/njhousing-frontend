@@ -46,15 +46,20 @@ const SearchBar = () => {
           />
           <TextInput
             placeholder="Search New Property"
+            value={searchQuery}
             onChangeText={(text) => setSearchQuery(text)}
+            onSubmitEditing={() =>
+              navigation.navigate("Search_Results", { query: searchQuery })
+            }
+            returnKeyType="search"
             style={{ width: 250 }}
           />
         </View>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Search_Results", {
-              query: searchQuery,
-            });
+            const q = (searchQuery || '').trim();
+            if (!q) return;
+            navigation.navigate("Search_Results", { query: q });
           }}
         >
           <AntDesign

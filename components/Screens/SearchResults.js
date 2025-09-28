@@ -1,39 +1,19 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Animated,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { AntDesign, Entypo } from "react-native-vector-icons";
-
-import { Searchbar } from "react-native-paper";
-import { LinearGradient } from "expo-linear-gradient";
+import { Entypo } from "react-native-vector-icons";
 import CustomText from "../common/Text";
 import { fetchSearchProperties } from "../../utils/apicalls/searchquery";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 const SeacrResults = () => {
-  const slideAnim = useRef(new Animated.Value(-100)).current; // starts off-screen
   const route = useRoute();
   const { query } = route.params;
   const [data, setData] = useState([]);
   const navigation = useNavigation();
 
   useEffect(() => {
-    Animated.timing(slideAnim, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  }, []);
-
-  useEffect(() => {
     fetchSearchProperties(query, setData);
-  }, []);
+  }, [query]);
 
   const Item = ({ item }) => {
     return (
@@ -50,10 +30,21 @@ const SeacrResults = () => {
             borderBottomWidth: 1,
             borderBottomColor: "gray",
             flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <Entypo name="location" />
-          <Text style={{ marginLeft: 10 }}>{item.title}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+            <Entypo name="location" />
+            <Text style={{ marginLeft: 10, flex: 1 }} numberOfLines={1}>
+              {item.title}
+            </Text>
+          </View>
+          {item.bedrooms && (
+            <View style={{ backgroundColor: "#EFEFFD", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, marginLeft: 8 }}>
+              <Text style={{ color: "#051138", fontSize: 12 }}>{item.bedrooms} bd</Text>
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -61,7 +52,33 @@ const SeacrResults = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList data={data} renderItem={({ item }) => <Item item={item} />} />
+      {/* Quick Filters */}
+      <View style={{ flexDirection: "row", padding: 10, gap: 8 }}>
+        <TouchableOpacity
+          style={styles.chip}
+          onPress={() => setData((prev) => prev.filter((x) => (x.description || '').includes('Bed')))}
+        >
+          <Text style={styles.chipText}>Bedrooms</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.chip}
+          onPress={() => setData((prev) => prev.filter((x) => (x.details?.kitchen || x.description || '').toString().length > 0))}
+        >
+          <Text style={styles.chipText}>Kitchen</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.chip}
+          onPress={() => setData((prev) => prev.filter((x) => (x.details?.neighborhood_amenities || '').toString().length > 0))}
+        >
+          <Text style={styles.chipText}>Amenities</Text>
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        data={data}
+        keyExtractor={(item, idx) => item._id || String(idx)}
+        renderItem={({ item }) => <Item item={item} />}
+      />
     </View>
   );
 };

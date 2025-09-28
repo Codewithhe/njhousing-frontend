@@ -18,11 +18,18 @@ import {
 import CustomText from "../common/Text";
 import { HOST } from "../../utils/static";
 
+// Map specific property IDs to local bundled images
+const idToLocalImage = {
+  // unit_1196061 should display unit_619802_WebFile.png from assets/images/propertyImage
+  unit_1196061: require("../../assets/images/propertyImage/unit_619802_WebFile.png"),
+};
+
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 
 const PropertyCard = ({
   onPress,
+  id,
   title,
   location,
   price,
@@ -44,19 +51,28 @@ const PropertyCard = ({
   };
 
   const randomRating = useMemo(() => getRandomRating(), []);
+  const localImage = id ? idToLocalImage[id] : undefined;
+  const PLACEHOLDER = require("../../assets/images/propertyImage/unit_621870_grayNoPics.png");
+
+  const getImageSource = () => {
+    if (localImage) return localImage;
+    if (typeof image === "string" && /^https?:/i.test(image)) {
+      if (image.toLowerCase().includes("graynopics")) return PLACEHOLDER;
+      return { uri: image };
+    }
+    if (image && image !== "N/A") {
+      return { uri: `${HOST}resources/${image}` };
+    }
+    return PLACEHOLDER;
+  };
+
+  const resolvedSource = getImageSource();
+
   return (
     <Pressable onPress={onPress}>
       <View style={styles.card}>
         <View style={styles.imageContainer}>
-          {image === "N/A" ? (
-            <Image
-              source={{ uri: `${HOST}resources/${image}` }}
-              style={styles.image}
-            />
-          ) : image ===
-            "https://www.myhousingsearch.com/graphics/images/grayNoPics.png" ? (
-            <Image source={{ uri: image }} style={styles.image} />
-          ) : null}
+          <Image source={resolvedSource} style={styles.image} />
 
           <View style={styles.typeBadge}>
             <Text style={styles.typeText}>{cleanedStrig[2]}</Text>

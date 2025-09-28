@@ -24,6 +24,7 @@ const screenHeight = Dimensions.get("window").height;
 const RenderList = ({ item, navigation }) => (
   <View style={{ justifyContent: "center", alignItems: "center" }}>
     <PropertyCard
+      id={item._id}
       widthlist={false}
       onPress={() =>
         navigation.navigate("PropertyDetail", {

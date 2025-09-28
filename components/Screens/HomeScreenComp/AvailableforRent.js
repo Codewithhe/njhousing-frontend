@@ -27,6 +27,16 @@ const AvailableforRent = () => {
     fetchallcounty(setData, "Dover");
     fetchallcounty(setOtherCity, "Clifton");
   }, []);
+  
+  // Debug: log fetched lists for verification
+  useEffect(() => {
+    console.log("AvailableforRent data (Dover)", data?.length ?? 0, data);
+  }, [data]);
+
+  useEffect(() => {
+    console.log("AvailableforRent otherCity (Clifton)", otherCity?.length ?? 0, otherCity);
+  }, [otherCity]);
+
 
   return (
     <ScrollView>
@@ -47,7 +57,12 @@ const AvailableforRent = () => {
             style={{ width: 50, height: 40 }}
             labelStyle={{ fontSize: 12, color: "#9d011f" }}
             mode="text"
-            onPress={() => navigation.navigate("Explore")}
+            onPress={() =>
+              navigation.navigate("Root", {
+                screen: "Tabs",
+                params: { screen: "Explore" },
+              })
+            }
           >
             See all
           </Button>
@@ -59,6 +74,7 @@ const AvailableforRent = () => {
                 item.price = item.price === undefined ? "N/A" : item.price;
                 return (
                   <PropertyCard
+                    id={item._id}
                     widthlist={true}
                     onPress={() =>
                       navigation.navigate("PropertyDetail", {
@@ -111,6 +127,7 @@ const AvailableforRent = () => {
                 otherCity.map((item, index) => {
                   return (
                     <PropertyCard
+                      id={item._id}
                       widthlist={true}
                       onPress={() =>
                         navigation.navigate("PropertyDetail", {

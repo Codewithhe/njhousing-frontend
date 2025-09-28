@@ -81,9 +81,9 @@ const SubscriptionScreen = () => {
             </View>
           ))}
         </View>
-        {/* Subscribe Button */}
+        {/* Pre-Application Button */}
         <TouchableOpacity style={styles.button} onPress={handleSubscribe}>
-          <Text style={styles.buttonText}>Subscribe Now</Text>
+          <Text style={styles.buttonText}>Start Pre-Application</Text>
         </TouchableOpacity>
 
         <Text style={styles.disclaimer}>

@@ -3,18 +3,19 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
   ImageBackground,
   StatusBar,
 } from "react-native";
-import React, { useEffect } from "react";
-import { Button } from "react-native-paper";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import CustomText from "../../common/Text";
 import CustomLogo from "../../CustomLogo";
 import Botttombar from "./Botttombar";
-const Splashone = () => {
+import * as Font from "expo-font";
+
+const Splashthree = () => {
   const navigation = useNavigation();
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
     async function loadFonts() {
@@ -26,32 +27,31 @@ const Splashone = () => {
     loadFonts();
   }, []);
 
+  if (!fontsLoaded) {
+    return null; // Or splash loader
+  }
+
   return (
     <ImageBackground
       style={[
         styles.container,
         {
+          flex: 1,
           justifyContent: "space-between",
-          backgroundColor: "white",
+          backgroundColor: "#051138", // 🔹 background color added
         },
       ]}
-      source={require("../../../assets/images/background/back.png")}
+      source={require("../../../assets/images/background/splash.png")}
+      resizeMode="cover"
     >
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="white" />
+        <StatusBar barStyle="light-content" backgroundColor="#051138" />
 
-        <View
-          style={{
-            marginHorizontal: 50,
-            backgroundColor: "#051138",
-            padding: 30,
-            borderRadius: 10,
-          }}
-        >
+        <View style={{ marginHorizontal: 50 }}>
           <CustomLogo
-            color={"white"}
             image={require("../../../assets/images/logo_comp/nj_house_map.png")}
           />
+
           <View style={{ justifyContent: "center", alignItems: "center" }}>
             <CustomText
               style={[
@@ -60,30 +60,20 @@ const Splashone = () => {
                   fontSize: 25,
                   marginTop: 30,
                   fontWeight: "200",
+                  color: "white", // text contrast on dark bg
                 },
               ]}
             >
-              Affordable Housing,
+              Affordable Housing, Made Simple.
             </CustomText>
-            <CustomText
-              style={[
-                styles.text,
-                {
-                  fontSize: 24,
-                  fontWeight: "200",
-                },
-              ]}
-            >
-              Made Simple.
-            </CustomText>
+
             <Text
               style={[
                 styles.text,
                 {
                   fontSize: 15,
-                  color: "white",
-
-                  marginTop: 30,
+                  color: "lightgray", // better visibility
+                  marginTop: 1,
                   fontWeight: "200",
                   textAlign: "center",
                 },
@@ -95,13 +85,9 @@ const Splashone = () => {
           </View>
         </View>
       </SafeAreaView>
-      <View
-        style={
-          {
-            // backgroundColor: "white",
-          }
-        }
-      >
+
+      {/* Bottom Button */}
+      <View style={styles.bottomBox}>
         <Botttombar
           title="Get Started"
           navigation={() => navigation.navigate("Splashtwo")}
@@ -111,24 +97,38 @@ const Splashone = () => {
   );
 };
 
-export default Splashone;
+export default Splashthree;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    paddingTop: 180,
   },
   content: {
     justifyContent: "center",
     width: "100%",
-    top: 130,
-
+    height: 600,
     position: "absolute",
+    zIndex:2
   },
   text: {
     fontSize: 12,
     fontWeight: "500",
-    color: "white",
+    color: "white", // default white text for dark background
+    textAlign: "center",
+  },
+  centerBox: {
+    backgroundColor: "#051138",
+    padding: 30,
+    borderRadius: 10,
+    alignItems: "center",
+    position: "absolute",
+    zIndex:1
+  },
+  bottomBox: {
+    marginBottom: 40,
+    width: "100%",
+    alignItems: "center",
   },
 });

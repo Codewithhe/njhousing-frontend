@@ -132,5 +132,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
     color: "black",
+    textAlign: "center",
   },
 });

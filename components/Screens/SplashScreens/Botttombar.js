@@ -7,10 +7,12 @@ const Botttombar = ({ navigation, title }) => {
     <View
       style={{
         justifyContent: "center",
-        marginHorizontal: 20,
         alignItems: "center",
         flexDirection: "row",
-        margin: 40,
+        width: "100%",
+        paddingBottom: 16,
+        paddingTop: 0,
+        paddingHorizontal: 20,
       }}
     >
       <Pressable
