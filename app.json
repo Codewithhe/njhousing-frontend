@@ -7,10 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "assetBundlePatterns": [
-      "assets/images/**/*",
-      "assets/fonts/**/*"
-    ],
+    "assetBundlePatterns": ["assets/images/**/*", "assets/fonts/**/*"],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -33,10 +30,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-font",
-      "expo-asset"
-    ],
+    "plugins": ["expo-font", "expo-asset"],
     "runtimeVersion": "1.0.0",
     "extra": {
       "eas": {
