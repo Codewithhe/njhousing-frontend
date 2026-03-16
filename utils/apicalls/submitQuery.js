@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Alert } from "react-native";
+import Toast from "react-native-toast-message";
 import { HOST } from "../static";
 
 export const submitContactQuery = async (formData, navigation, setLoading) => {
@@ -12,14 +12,31 @@ export const submitContactQuery = async (formData, navigation, setLoading) => {
     });
 
     setLoading(false);
-    Alert.alert("Success", response.data.message);
-
+    Toast.show({
+      type: "success",
+      text1: "Success",
+      text2: response.data?.message || "Application submitted successfully!",
+    });
+    navigation.goBack();
   } catch (error) {
     setLoading(false);
     if (error.response) {
-      Alert.alert("Error", error.response.data.message);
+      console.log("--- BACKEND ERROR RESPONSE ---");
+      console.log(JSON.stringify(error.response.data, null, 2));
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: error.response.data.message || "Required fields missing on server.",
+      });
     } else {
-      Alert.alert("Error", "Network error. Please try again later.");
+      console.log("--- NETWORK ERROR ---");
+      console.log(error.message);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Network error. Please try again later.",
+      });
     }
+    return false;
   }
 };

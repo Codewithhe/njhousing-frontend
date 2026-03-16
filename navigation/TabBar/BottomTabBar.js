@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Image, Platform, Text, View } from "react-native";
+import { Image, Platform, Text, View, StyleSheet } from "react-native";
+import { COLORS, SHADOWS, BORDER_RADIUS } from "../../utils/theme";
 
 // Import screens
 import HomeScreen from "../../components/Screens/HomeScreen";
@@ -25,17 +26,21 @@ import LotteryScreen from "../../components/Screens/lottery/LotteryScreen";
 const Tab = createBottomTabNavigator();
 
 const getTabBarIcon = (focused, activeIcon, inactiveIcon, label) => (
-  <View style={{ alignItems: "center", marginTop: 20, width: 100 }}>
-    <Image
-      source={focused ? activeIcon : inactiveIcon}
-      style={{ width: 24, height: 24, resizeMode: "contain" }}
-    />
+  <View style={styles.iconContainer}>
+    <View style={[styles.iconWrapper, focused && styles.iconWrapperActive]}>
+      <Image
+        source={focused ? activeIcon : inactiveIcon}
+        style={[styles.icon, { tintColor: focused ? COLORS.primary : COLORS.gray400 }]}
+      />
+    </View>
     <Text
-      style={{
-        fontSize: 12,
-        color: focused ? "#000" : "#999",
-        marginTop: 2,
-      }}
+      style={[
+        styles.iconLabel,
+        {
+          color: focused ? COLORS.primary : COLORS.gray400,
+          fontFamily: focused ? "Poppins-Semi" : "Poppins-Regular",
+        },
+      ]}
     >
       {label}
     </Text>
@@ -51,10 +56,7 @@ export default function MyTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          height: Platform.OS === "ios" ? 80 : 70,
-          paddingBottom: Platform.OS === "ios" ? 10 : 5,
-        },
+        tabBarStyle: styles.tabBar,
         tabBarShowLabel: false, // We use custom label inside icon render
       }}
     >
@@ -110,3 +112,38 @@ export default function MyTabs() {
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    height: Platform.OS === "ios" ? 85 : 75,
+    paddingBottom: Platform.OS === "ios" ? 20 : 10,
+    backgroundColor: COLORS.surface,
+    borderTopWidth: 0,
+    borderTopLeftRadius: BORDER_RADIUS.xl,
+    borderTopRightRadius: BORDER_RADIUS.xl,
+    position: 'absolute',
+    ...SHADOWS.large,
+  },
+  iconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+    width: 80,
+  },
+  iconWrapper: {
+    padding: 8,
+    borderRadius: BORDER_RADIUS.pill,
+  },
+  iconWrapperActive: {
+    backgroundColor: COLORS.accentSoft,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    resizeMode: "contain",
+  },
+  iconLabel: {
+    fontSize: 10,
+    marginTop: 4,
+  },
+});

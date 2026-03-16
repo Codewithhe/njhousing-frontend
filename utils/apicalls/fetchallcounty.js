@@ -10,10 +10,15 @@ export const fetchallcounty = async (setData, query) => {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
+        timeout: 10000, // 10 second timeout to prevent hang
       }
     );
-    setData(response.data);
+    const results = response.data;
+    // Ensure we always set an array (even if API returns null/undefined)
+    setData(Array.isArray(results) ? results : []);
   } catch (error) {
-    console.error("Error fetching county listings:", error);
+    console.error("Error fetching county listings:", error?.message || error);
+    // Set empty array on error so the UI shows "no properties" instead of infinite spinner
+    setData([]);
   }
 };

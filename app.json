@@ -1,17 +1,27 @@
 {
   "expo": {
     "name": "Affordable Nj Housing",
-    "slug": "Affordable Nj Housing",
+    "slug": "affordable-nj-housing-perfect-home-in-nj",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo_comp/nj_house_map.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "assetBundlePatterns": ["assets/images/**/*", "assets/fonts/**/*"],
+    "assetBundlePatterns": [
+      "assets/images/**/*",
+      "assets/fonts/**/*"
+    ],
+    "updates": {
+      "url": "https://u.expo.dev/2f39b47a-c7d5-49bb-89bd-926e9162a01a",
+      "enabled": true,
+      "checkOnLaunch": "ALWAYS",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": "1.0.0",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#051138"
     },
     "ios": {
       "supportsTablet": true,
@@ -23,19 +33,23 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png"
-        
       },
-      "package": "com.rentaxo.com"
+      "package": "com.rentaxo.com",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font", "expo-asset"],
-    "runtimeVersion": "1.0.0",
+    "plugins": [
+      "expo-font",
+      "expo-asset",
+      "expo-updates"
+    ],
     "extra": {
       "eas": {
-        "projectId": "2f39b47a-c7d5-49bb-89bd-926e9162a01a"
+        "projectId": "54637cd4-4317-4e86-9e6f-dd380cdffdd1"
       }
-    }
+    },
+    "owner": "njhousing"
   }
 }

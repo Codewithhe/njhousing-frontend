@@ -1,102 +1,54 @@
 import {
   SafeAreaView,
   StyleSheet,
-  Text,
   View,
-  Image,
-  ImageBackground,
   StatusBar,
+  ImageBackground,
 } from "react-native";
 import React, { useEffect } from "react";
-import { WebView } from "react-native-webview";
-import { StatusBar as ExpoStatusBar } from "expo-status-bar";
-import { Button } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import CustomTextBold from "../common/BoldCustomtext";
-import CustomText from "../common/Text";
-import CustomTextLight from "../common/CustomTextLight";
+import { useSelector } from "react-redux";
+import { LinearGradient } from "expo-linear-gradient";
 import CustomLogo from "../CustomLogo";
+import { COLORS } from "../../utils/theme";
+
 const SplashScreen = () => {
   const navigation = useNavigation();
+  const isLoggedIn = useSelector((state) => state.user.loggedIn);
 
   useEffect(() => {
-    setTimeout(() => navigation.navigate("Root"), [1000]);
-    async function loadFonts() {
-      await Font.loadAsync({
-        "Hind-Jalandhar": require("../../assets/fonts/Hind/Hind-Regular.ttf"),
-      });
-      setFontsLoaded(true);
-    }
-    loadFonts();
-  }, []);
-  return (
-    <ImageBackground
-      style={[
-        styles.container,
-        {
-          justifyContent: "space-between",
-        },
-      ]}
-      source={require("../../assets/images/background/back.png")}
-    >
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="white" />
+    const timer = setTimeout(() => {
+      if (isLoggedIn) {
+        navigation.navigate("Root");
+      } else {
+        navigation.navigate("Splashone");
+      }
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [navigation, isLoggedIn]);
 
-        <View
-          style={{
-            marginHorizontal: 50,
-            backgroundColor: "#051138",
-            padding: 30,
-            borderRadius: 10,
-          }}
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
+      <ImageBackground
+        source={require("../../assets/images/background/premium_bg.png")}
+        style={styles.imageBackground}
+      >
+        <LinearGradient
+          colors={["rgba(5, 17, 56, 0.4)", "rgba(5, 17, 56, 0.8)"]}
+          style={styles.overlay}
         >
-          <CustomLogo
-            color={"white"}
-            image={require("../../assets/images/logo_comp/nj_house_map.png")}
-          />
-          <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <CustomText
-              style={[
-                styles.text,
-                {
-                  fontSize: 20,
-                  marginTop: 20,
-                  fontWeight: "200",
-                },
-              ]}
-            >
-              Affordable Housing,
-            </CustomText>
-            <CustomText
-              style={[
-                styles.text,
-                {
-                  fontSize: 30,
-                  fontWeight: "200",
-                },
-              ]}
-            >
-              Made Simple.
-            </CustomText>
-            <Text
-              style={[
-                styles.text,
-                {
-                  fontSize: 15,
-                  color: "white",
-                  marginTop: 30,
-                  fontWeight: "200",
-                  textAlign: "center",
-                },
-              ]}
-            >
-              Find homes, check your eligibility, and get expert guidance - all
-              in one app
-            </Text>
-          </View>
-        </View>
-      </SafeAreaView>
-    </ImageBackground>
+          <SafeAreaView style={styles.safeArea}>
+            <View style={styles.logoWrapper}>
+              <CustomLogo
+                color={COLORS.white}
+                image={require("../../assets/images/logo_comp/nj_house_map.png")}
+              />
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </ImageBackground>
+    </View>
   );
 };
 
@@ -105,19 +57,24 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.primary,
+  },
+  imageBackground: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  overlay: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  content: {
+  logoWrapper: {
+    transform: [{ scale: 1.15 }],
+    alignItems: "center",
     justifyContent: "center",
-    width: "100%",
-    height: 600,
-    // alignItems: "center",
-    position: "absolute",
-  },
-  text: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "white",
   },
 });

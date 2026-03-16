@@ -14,8 +14,10 @@ import ContactQueryForm from "../../components/ContactQueryForm";
 import VerifyOTPScreen from "../../components/Screens/Authentication/VerifyOTP";
 import DrawerNavigator from "../drawer/navigtor";
 import SeacrResults from "../../components/Screens/SearchResults";
-import StripeCheckoutButton from "../../components/Payment/paymenrButton";
+import PaymentGateway from "../../components/Payment/paymenrButton";
 import Splashone from "../../components/Screens/SplashScreens/Splashone";
+import Splashtwo from "../../components/Screens/SplashScreens/Splashtwo";
+import Splashthree from "../../components/Screens/SplashScreens/Splashthree";
 import Faq from "../../components/Screens/Faq/screen";
 import Terms from "../../components/Screens/TermsAndConditions/screen";
 
@@ -25,13 +27,7 @@ const AuthRootStackNavigator = () => {
   return (
     <RootStack.Navigator
       screenOptions={{
-        transition: {
-          config: (transitionProps) => ({
-            transition: "slide",
-            duration: 500,
-            easing: Easing.linear,
-          }),
-        },
+        headerShown: false,
       }}
     >
       <RootStack.Screen
@@ -91,6 +87,18 @@ const AuthRootStackNavigator = () => {
         name="Splashone"
         options={{ headerShown: false, headerTitle: "" }}
         component={Splashone}
+      ></RootStack.Screen>
+
+      <RootStack.Screen
+        name="Splashtwo"
+        options={{ headerShown: false, headerTitle: "" }}
+        component={Splashtwo}
+      ></RootStack.Screen>
+
+      <RootStack.Screen
+        name="Splashthree"
+        options={{ headerShown: false, headerTitle: "" }}
+        component={Splashthree}
       ></RootStack.Screen>
       <RootStack.Screen
         name="TenantFinder"
@@ -165,7 +173,7 @@ const AuthRootStackNavigator = () => {
       <RootStack.Screen
         name="Payment"
         options={{ headerShown: true, headerTitle: "" }}
-        component={StripeCheckoutButton}
+        component={PaymentGateway}
       ></RootStack.Screen>
 
       <RootStack.Screen

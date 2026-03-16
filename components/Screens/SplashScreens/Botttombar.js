@@ -1,34 +1,20 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Entypo } from "react-native-vector-icons";
+import { COLORS, SHADOWS, SPACING, FONT_FAMILY, FONT_SIZE } from "../../../utils/theme";
 
 const Botttombar = ({ navigation, title }) => {
   return (
-    <View
-      style={{
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "row",
-        width: "100%",
-        paddingBottom: 16,
-        paddingTop: 0,
-        paddingHorizontal: 20,
-      }}
-    >
+    <View style={styles.outerContainer}>
       <Pressable
         onPress={navigation}
-        style={{
-          backgroundColor: "#efefef",
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 10,
-          borderRadius: 10,
-          width: 300,
-        }}
+        style={({ pressed }) => [
+          styles.button,
+          { opacity: pressed ? 0.8 : 1 }
+        ]}
       >
-        <Text>{title}</Text>
-        <Entypo name="chevron-thin-right" style={{ marginLeft: 10 }} />
+        <Text style={styles.buttonText}>{title}</Text>
+        <Entypo name="arrow-long-right" size={20} color={COLORS.white} />
       </Pressable>
     </View>
   );
@@ -36,4 +22,26 @@ const Botttombar = ({ navigation, title }) => {
 
 export default Botttombar;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  outerContainer: {
+    width: "100%",
+    paddingHorizontal: SPACING.xxl,
+    paddingBottom: SPACING.xxxl,
+  },
+  button: {
+    backgroundColor: COLORS.primary,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: SPACING.lg,
+    borderRadius: 16,
+    width: "100%",
+    ...SHADOWS.medium,
+  },
+  buttonText: {
+    color: COLORS.white,
+    fontSize: FONT_SIZE.lg,
+    fontFamily: FONT_FAMILY.semiBold,
+    marginRight: SPACING.md,
+  },
+});

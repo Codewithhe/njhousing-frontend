@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -7,20 +7,28 @@ import {
   ScrollView,
   Switch,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { Checkbox } from "react-native-paper";
 import * as Yup from "yup";
 import { Formik } from "formik";
+import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { submitContactQuery } from "../utils/apicalls/submitQuery";
 import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 import ProgressBar from "./common/Progressbar";
 import CustomText from "./common/Text";
+import { COLORS, SPACING, FONT_SIZE, BORDER_RADIUS, SHADOWS, GRADIENTS } from "../utils/theme";
+import CustomTextBold from "./common/BoldCustomtext";
+import { LinearGradient } from "expo-linear-gradient";
 
 const validationSchemas = [
+  // Step 1: Pre-App Property
   Yup.object().shape({
     property: Yup.string().required("Property Location is required"),
   }),
+  // Step 2: Head of Household Info
   Yup.object().shape({
     salutation: Yup.string().required("Salutation is required"),
     firstName: Yup.string().required("First Name is required"),
@@ -29,15 +37,16 @@ const validationSchemas = [
     suffix: Yup.string(),
     email: Yup.string().email("Invalid email").required("Email is required"),
     phone: Yup.string()
-      .matches(/^\d+$/, "Phone must be digits only")
       .min(10, "Phone must be at least 10 digits")
       .required("Phone is required"),
     extension: Yup.string(),
     address1: Yup.string().required("Address Line 1 is required"),
     address2: Yup.string(),
-    city2: Yup.string().required("City is required"),
-    state2: Yup.string().required("State is required"),
+    city: Yup.string().required("City is required"),
+    state: Yup.string().required("State is required"),
+    zipCode: Yup.string().required("Zip Code is required"),
   }),
+  // Step 3: Household Composition
   Yup.object().shape({
     headName: Yup.string().required("Head of Household Name is required"),
     dob: Yup.date()
@@ -71,27 +80,28 @@ const validationSchemas = [
       .oneOf(["Yes", "No"], "Select Yes or No")
       .required("Rental assistance field is required"),
   }),
+  // Step 4: Additional Information
   Yup.object().shape({
-    income: Yup.number()
-      .typeError("Annual Income must be a number")
-      .required("Annual Income is required")
-      .min(0, "Income cannot be negative"),
-    rent: Yup.number()
-      .typeError("Monthly Rent must be a number")
-      .required("Monthly Rent is required")
-      .min(0, "Rent cannot be negative"),
     householdSize: Yup.string()
       .oneOf(["1", "2", "3", "4", "5+"], "Invalid Household Size")
       .required("Total Household Size is required"),
     adaAccessible: Yup.boolean(),
     substandardHousing: Yup.boolean(),
-    veteran: Yup.boolean(),
+    householdVeteran: Yup.boolean(),
     studioContact: Yup.boolean(),
   }),
+  // Step 5: Signature
   Yup.object().shape({
     eSignature: Yup.string().required("Signature is required"),
     signatureDate: Yup.date()
-      .max(new Date(), "Signature date cannot be in the future")
+      .test("not-future", "Signature date cannot be in the future", (value) => {
+        if (!value) return false;
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const selected = new Date(value);
+        selected.setHours(0, 0, 0, 0);
+        return selected <= now;
+      })
       .required("Signature date is required"),
     hearAbout: Yup.string()
       .oneOf(
@@ -99,26 +109,16 @@ const validationSchemas = [
         "Select an option"
       )
       .required("Please select how you heard about COAH PRO"),
+    agreeTerms: Yup.boolean().oneOf([true], "You must agree to the terms"),
   }),
-
-  Yup.object()
-    .shape({
-      monthly: Yup.boolean(),
-      yearly: Yup.boolean(),
-      monthlyAmount: Yup.number().min(0),
-      yearlyAmount: Yup.number().min(0),
-    })
-    .test(
-      "select-plan",
-      "Please select either Monthly or Yearly plan",
-      (values) => values.monthly || values.yearly
-    ),
 ];
 
 function ContactQueryform() {
+  const { user } = useSelector((state) => state.user);
   const [step, setStep] = useState(1);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const navigation = useNavigation();
+
   const initialValues = {
     property: "",
     salutation: "",
@@ -131,8 +131,8 @@ function ContactQueryform() {
     extension: "",
     address1: "",
     address2: "",
-    city2: "",
-    state2: "",
+    city: "",
+    state: "",
     headName: "",
     dob: null,
     gender: "",
@@ -144,19 +144,16 @@ function ContactQueryform() {
     veteran: "",
     section8: "",
     rentalAssistance: "",
-    income: "",
-    rent: "",
     householdSize: "",
     adaAccessible: false,
     substandardHousing: false,
+    householdVeteran: false,
     studioContact: false,
     eSignature: "",
-    signatureDate: null,
+    signatureDate: new Date(),
     hearAbout: "",
-    monthly: false,
-    monthlyAmount: 0,
-    yearly: false,
-    yearlyAmount: 0,
+    zipCode: "",
+    agreeTerms: false,
   };
 
   const renderStep = ({
@@ -166,29 +163,32 @@ function ContactQueryform() {
     handleChange,
     handleBlur,
     setFieldValue,
+    submitCount,
   }) => {
+    // Only show errors after user has attempted to submit
+    const showError = (field) => submitCount > 0 && touched[field] && errors[field];
+
     switch (step) {
       case 1:
         return (
           <View>
-            <CustomText
-              style={{ fontWeight: "bold", fontSize: 18, marginTop: 10 }}
-            >
+            <CustomTextBold style={styles.header}>
               Pre-Application
-            </CustomText>
-            <CustomText style={{ marginTop: 10 }}>
+            </CustomTextBold>
+            <CustomText style={styles.notice}>
               Before you begin, please ensure you have all your household and
               income details ready...
             </CustomText>
             <TextInput
-              style={[styles.input]}
+              style={styles.input}
               placeholder="Property Location"
               value={values.property}
               onChangeText={handleChange("property")}
               onBlur={handleBlur("property")}
+              placeholderTextColor={COLORS.textTertiary}
             />
-            {touched.property && errors.property && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {showError("property") && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.property}
               </CustomText>
             )}
@@ -198,54 +198,70 @@ function ContactQueryform() {
       case 2:
         return (
           <View>
-            <CustomText style={{ fontWeight: "bold", fontSize: 18 }}>
+            <CustomTextBold style={styles.header}>
               1. Head of Household Information
-            </CustomText>
+            </CustomTextBold>
             {[
               { name: "salutation", placeholder: "Salutation (Mr./Ms./Dr.)" },
               { name: "firstName", placeholder: "First Name" },
               { name: "middleName", placeholder: "Middle Name (optional)" },
               { name: "lastName", placeholder: "Last Name" },
-              {
-                name: "suffix",
-                placeholder: "Suffix (e.g., Jr., Sr.) (optional)",
-              },
-              {
-                name: "email",
-                placeholder: "Email",
-                keyboardType: "email-address",
-              },
-              {
-                name: "phone",
-                placeholder: "Phone",
-                keyboardType: "phone-pad",
-              },
+              { name: "suffix", placeholder: "Suffix (e.g., Jr., Sr.) (optional)" },
+              { name: "email", placeholder: "Email", keyboardType: "email-address" },
+              { name: "phone", placeholder: "Phone", keyboardType: "phone-pad" },
               { name: "extension", placeholder: "Extension (optional)" },
               { name: "address1", placeholder: "Address Line 1" },
               { name: "address2", placeholder: "Address Line 2 (optional)" },
-              { name: "city2", placeholder: "City" },
-              { name: "state2", placeholder: "State" },
+              { name: "city", placeholder: "City" },
+              { name: "state", placeholder: "State" },
+              { name: "zipCode", placeholder: "Zip Code", keyboardType: "numeric" },
             ].map(({ name, placeholder, keyboardType }) => (
-              <View key={name}>
-                <TextInput
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#ccc",
-                    borderRadius: 10,
-                    paddingVertical: 12,
-                    paddingHorizontal: 16,
-                    fontSize: 16,
-                    backgroundColor: "#f9f9f9",
-                    marginTop: 20,
-                  }}
-                  placeholder={placeholder}
-                  value={values[name]}
-                  onChangeText={handleChange(name)}
-                  onBlur={handleBlur(name)}
-                  keyboardType={keyboardType || "default"}
-                />
-                {touched[name] && errors[name] && (
-                  <CustomText style={{ color: "red", marginTop: 10 }}>
+              <View key={name} style={{ marginBottom: SPACING.md }}>
+                <CustomText style={styles.inputLabel}>{placeholder}</CustomText>
+                {name === "salutation" ? (
+                  <View style={{ marginTop: SPACING.xs, borderWidth: 1, borderColor: COLORS.border, borderRadius: BORDER_RADIUS.md, backgroundColor: COLORS.surface, overflow: "hidden" }}>
+                    <Picker
+                      selectedValue={values[name]}
+                      onValueChange={(itemValue) => setFieldValue(name, itemValue)}
+                      style={{ color: COLORS.textPrimary }}
+                    >
+                      <Picker.Item label="Select Salutation *" value="" color={COLORS.textTertiary} />
+                      <Picker.Item label="Mr." value="Mr." color={COLORS.textPrimary} />
+                      <Picker.Item label="Ms." value="Ms." color={COLORS.textPrimary} />
+                      <Picker.Item label="Mrs." value="Mrs." color={COLORS.textPrimary} />
+                      <Picker.Item label="Dr." value="Dr." color={COLORS.textPrimary} />
+                    </Picker>
+                  </View>
+                ) : name === "suffix" ? (
+                  <View style={{ marginTop: SPACING.xs, borderWidth: 1, borderColor: COLORS.border, borderRadius: BORDER_RADIUS.md, backgroundColor: COLORS.surface, overflow: "hidden" }}>
+                    <Picker
+                      selectedValue={values[name]}
+                      onValueChange={(itemValue) => setFieldValue(name, itemValue)}
+                      style={{ color: COLORS.textPrimary }}
+                    >
+                      <Picker.Item label="Select Suffix (optional)" value="" color={COLORS.textTertiary} />
+                      <Picker.Item label="Jr." value="Jr." color={COLORS.textPrimary} />
+                      <Picker.Item label="Sr." value="Sr." color={COLORS.textPrimary} />
+                      <Picker.Item label="II" value="II" color={COLORS.textPrimary} />
+                      <Picker.Item label="III" value="III" color={COLORS.textPrimary} />
+                      <Picker.Item label="IV" value="IV" color={COLORS.textPrimary} />
+                      <Picker.Item label="Ph.D" value="Ph.D" color={COLORS.textPrimary} />
+                      <Picker.Item label="M.D" value="M.D" color={COLORS.textPrimary} />
+                    </Picker>
+                  </View>
+                ) : (
+                  <TextInput
+                    style={[styles.input, { marginTop: SPACING.xs }]}
+                    placeholder={placeholder}
+                    value={values[name]}
+                    onChangeText={handleChange(name)}
+                    onBlur={handleBlur(name)}
+                    keyboardType={keyboardType || "default"}
+                    placeholderTextColor={COLORS.textTertiary}
+                  />
+                )}
+                {submitCount > 0 && touched[name] && errors[name] && (
+                  <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                     {errors[name]}
                   </CustomText>
                 )}
@@ -256,47 +272,46 @@ function ContactQueryform() {
 
       case 3:
         return (
-          <ScrollView contentContainerStyle={{ marginBottom: 200 }}>
-            <CustomText style={{ fontWeight: "bold", fontSize: 18 }}>
+          <View style={{ paddingBottom: SPACING.xxxl }}>
+            <CustomTextBold style={styles.header}>
               3. Household Composition
-            </CustomText>
+            </CustomTextBold>
 
+            <CustomText style={styles.inputLabel}>Head of Household Name *</CustomText>
             <TextInput
-              style={styles.input}
-              placeholder="Head of Household Name (First and Last Name)"
-              value={values.headName}
+              style={[styles.input, { marginTop: SPACING.xs }]}
+              placeholder="First and Last Name"
+              value={values.headName || `${values.firstName} ${values.lastName}`.trim()}
               onChangeText={handleChange("headName")}
               onBlur={handleBlur("headName")}
+              placeholderTextColor={COLORS.textTertiary}
             />
-            {touched.headName && errors.headName && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {showError("headName") && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.headName}
               </CustomText>
             )}
 
+            <CustomText style={styles.inputLabel}>Date of Birth *</CustomText>
             <TouchableOpacity onPress={() => setShowDatePicker(true)}>
               <TextInput
-                style={styles.input}
-                placeholder="Date of Birth"
-                value={
-                  values.dob ? new Date(values.dob).toLocaleDateString() : ""
-                }
+                style={[styles.input, { marginTop: SPACING.xs }]}
+                placeholder="Pick your Birth Date"
+                value={values.dob ? new Date(values.dob).toLocaleDateString() : ""}
                 editable={false}
-                pointerEvents="none" // ensures TextInput doesn’t take over tap
+                pointerEvents="none"
+                placeholderTextColor={COLORS.textTertiary}
               />
             </TouchableOpacity>
-
-            {touched.dob && errors.dob && (
-              <CustomText style={{ color: "red", marginTop: 10, fontSize: 12 }}>
+            {showError("dob") && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm, fontSize: FONT_SIZE.sm }}>
                 {errors.dob}
               </CustomText>
             )}
 
             {showDatePicker && (
               <DateTimePicker
-                value={
-                  values.dob ? new Date(values.dob) : new Date("2000-01-01")
-                }
+                value={values.dob ? new Date(values.dob) : new Date("2000-01-01")}
                 mode="date"
                 display="default"
                 maximumDate={new Date()}
@@ -309,330 +324,279 @@ function ContactQueryform() {
               />
             )}
 
-            <CustomText style={{ marginTop: 10, fontWeight: "bold" }}>
-              Gender
-            </CustomText>
-            <ScrollView horizontal={true} style={{ flexDirection: "row" }}>
+            <CustomText style={styles.label}>Gender</CustomText>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.radioGroup}>
               {["Male", "Female", "Transgender", "Other"].map((option) => (
                 <Checkbox.Item
                   key={option}
                   label={option}
                   status={values.gender === option ? "checked" : "unchecked"}
                   onPress={() => setFieldValue("gender", option)}
-                  style={{
-                    borderWidth: 1,
-                    margin: 5,
-                    borderRadius: 10,
-                    borderColor: "gray",
-                    alignItems: "center",
-                  }}
+                  style={[styles.checkboxItem, values.gender === option && { borderColor: COLORS.accent, backgroundColor: COLORS.accentSoft }]}
+                  color={COLORS.primary}
                 />
               ))}
             </ScrollView>
-            {touched.gender && errors.gender && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {submitCount > 0 && errors.gender && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.gender}
               </CustomText>
             )}
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginVertical: 10,
-              }}
-            >
-              <Text>Is this household member permanently disabled?</Text>
+            <View style={styles.switchContainer}>
+              <Text style={{ fontFamily: "Poppins-Semi", fontSize: FONT_SIZE.md, color: COLORS.textPrimary, flex: 1 }}>
+                Is this household member permanently disabled?
+              </Text>
               <Switch
                 value={values.disabled || false}
                 onValueChange={(val) => setFieldValue("disabled", val)}
-                style={{ marginLeft: 10 }}
+                trackColor={{ false: COLORS.gray300, true: COLORS.accentLight }}
+                thumbColor={values.disabled ? COLORS.accent : COLORS.white}
               />
             </View>
 
-            <CustomText style={{ fontWeight: "bold" }}>
+            <CustomText style={styles.label}>
               Will a 2nd person be living in your home?
             </CustomText>
-            <View style={{ flexDirection: "row" }}>
+            <View style={styles.radioGroup}>
               {["Yes", "No"].map((option) => (
                 <Checkbox.Item
                   key={option}
                   label={option}
-                  status={
-                    values.secondPerson === option ? "checked" : "unchecked"
-                  }
+                  status={values.secondPerson === option ? "checked" : "unchecked"}
                   onPress={() => setFieldValue("secondPerson", option)}
-                  style={{
-                    borderWidth: 1,
-                    margin: 5,
-                    borderRadius: 10,
-                    borderColor: "gray",
-                    alignItems: "center",
-                  }}
+                  style={[styles.checkboxItem, values.secondPerson === option && { borderColor: COLORS.accent, backgroundColor: COLORS.accentSoft }]}
+                  color={COLORS.primary}
                 />
               ))}
             </View>
-            {touched.secondPerson && errors.secondPerson && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {submitCount > 0 && errors.secondPerson && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.secondPerson}
               </CustomText>
             )}
 
-            <CustomText style={{ fontWeight: "bold" }}>
+            <CustomText style={styles.label}>
               Does your household live or work in New Jersey?
             </CustomText>
-            <View style={{ flexDirection: "row" }}>
+            <View style={styles.radioGroup}>
               {["Yes", "No"].map((option) => (
                 <Checkbox.Item
                   key={option}
                   label={option}
-                  status={
-                    values.njResident === option ? "checked" : "unchecked"
-                  }
+                  status={values.njResident === option ? "checked" : "unchecked"}
                   onPress={() => setFieldValue("njResident", option)}
-                  style={{
-                    borderWidth: 1,
-                    margin: 5,
-                    borderRadius: 10,
-                    borderColor: "gray",
-                    alignItems: "center",
-                  }}
+                  style={[styles.checkboxItem, values.njResident === option && { borderColor: COLORS.accent, backgroundColor: COLORS.accentSoft }]}
+                  color={COLORS.primary}
                 />
               ))}
             </View>
-            {touched.njResident && errors.njResident && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {submitCount > 0 && errors.njResident && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.njResident}
               </CustomText>
             )}
 
-            <TextInput
-              style={styles.input}
-              placeholder="What is the combined gross annual income for all Household Members?"
-              value={values.grossIncome}
-              onChangeText={handleChange("grossIncome")}
-              onBlur={handleBlur("grossIncome")}
-              keyboardType="numeric"
-            />
-            <CustomText style={{ fontWeight: "bold" }}>
-              Please include the gross BEFORE tax income of all household
-              members. Income includes gross wages, salaries, tips, commissions,
-              overtime, alimony, child support, pensions, social security,
-              unemployment, and disability benefits.
+            <CustomText style={styles.inputLabel}>Combined gross annual income (All Members) *</CustomText>
+            <View style={styles.amountInputContainer}>
+              <Text style={styles.dollarIcon}>$</Text>
+              <TextInput
+                style={[styles.input, { flex: 1, marginTop: 0, borderWidth: 0, backgroundColor: 'transparent', paddingHorizontal: 0 }]}
+                placeholder="e.g. 50000"
+                value={values.grossIncome}
+                onChangeText={handleChange("grossIncome")}
+                onBlur={handleBlur("grossIncome")}
+                keyboardType="numeric"
+                placeholderTextColor={COLORS.textTertiary}
+              />
+            </View>
+            <CustomText style={[styles.notice, { marginTop: SPACING.sm }]}>
+              Gross income BEFORE tax of all household members.
             </CustomText>
-            {touched.grossIncome && errors.grossIncome && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {showError("grossIncome") && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.xs }}>
                 {errors.grossIncome}
               </CustomText>
             )}
 
-            <TextInput
-              style={styles.input}
-              placeholder="Monthly rent payments (USD)"
-              value={values.monthlyRent}
-              onChangeText={handleChange("monthlyRent")}
-              onBlur={handleBlur("monthlyRent")}
-              keyboardType="numeric"
-            />
-            {touched.monthlyRent && errors.monthlyRent && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            <CustomText style={[styles.inputLabel, { marginTop: SPACING.lg }]}>Monthly rent payments *</CustomText>
+            <View style={styles.amountInputContainer}>
+              <Text style={styles.dollarIcon}>$</Text>
+              <TextInput
+                style={[styles.input, { flex: 1, marginTop: 0, borderWidth: 0, backgroundColor: 'transparent', paddingHorizontal: 0 }]}
+                placeholder="e.g. 1500"
+                value={values.monthlyRent}
+                onChangeText={handleChange("monthlyRent")}
+                onBlur={handleBlur("monthlyRent")}
+                keyboardType="numeric"
+                placeholderTextColor={COLORS.textTertiary}
+              />
+            </View>
+            {showError("monthlyRent") && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.monthlyRent}
               </CustomText>
             )}
 
-            <CustomText style={{ fontWeight: "bold" }}>
-              Are you a veteran?
-            </CustomText>
-            <View style={{ flexDirection: "row" }}>
+            <CustomText style={styles.label}>Are you a veteran?</CustomText>
+            <View style={styles.radioGroup}>
               {["Yes", "No"].map((option) => (
                 <Checkbox.Item
                   key={option}
                   label={option}
                   status={values.veteran === option ? "checked" : "unchecked"}
                   onPress={() => setFieldValue("veteran", option)}
-                  style={{
-                    borderWidth: 1,
-                    margin: 5,
-                    borderRadius: 10,
-                    borderColor: "gray",
-                    alignItems: "center",
-                  }}
+                  style={[styles.checkboxItem, values.veteran === option && { borderColor: COLORS.accent, backgroundColor: COLORS.accentSoft }]}
+                  color={COLORS.primary}
                 />
               ))}
             </View>
-            {touched.veteran && errors.veteran && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {submitCount > 0 && errors.veteran && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.veteran}
               </CustomText>
             )}
 
-            <CustomText style={{ fontWeight: "bold" }}>
+            <CustomText style={styles.label}>
               Do you currently have a Section 8 housing choice voucher?
             </CustomText>
-            <View style={{ flexDirection: "row" }}>
+            <View style={styles.radioGroup}>
               {["Yes", "No"].map((option) => (
                 <Checkbox.Item
                   key={option}
                   label={option}
                   status={values.section8 === option ? "checked" : "unchecked"}
                   onPress={() => setFieldValue("section8", option)}
-                  style={{
-                    borderWidth: 1,
-                    margin: 5,
-                    borderRadius: 10,
-                    borderColor: "gray",
-                    alignItems: "center",
-                  }}
+                  style={[styles.checkboxItem, values.section8 === option && { borderColor: COLORS.accent, backgroundColor: COLORS.accentSoft }]}
+                  color={COLORS.primary}
                 />
               ))}
             </View>
-            {touched.section8 && errors.section8 && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {submitCount > 0 && errors.section8 && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.section8}
               </CustomText>
             )}
 
-            <CustomText style={{ fontWeight: "bold" }}>
+            <CustomText style={styles.label}>
               Will you receive rental assistance from other sources including
               family members outside of the household? *
             </CustomText>
-            <View style={{ flexDirection: "row" }}>
+            <View style={styles.radioGroup}>
               {["Yes", "No"].map((option) => (
                 <Checkbox.Item
                   key={option}
                   label={option}
-                  status={
-                    values.rentalAssistance === option ? "checked" : "unchecked"
-                  }
+                  status={values.rentalAssistance === option ? "checked" : "unchecked"}
                   onPress={() => setFieldValue("rentalAssistance", option)}
-                  style={{
-                    borderWidth: 1,
-                    margin: 5,
-                    borderRadius: 10,
-                    borderColor: "gray",
-                    alignItems: "center",
-                  }}
+                  style={[styles.checkboxItem, values.rentalAssistance === option && { borderColor: COLORS.accent, backgroundColor: COLORS.accentSoft }]}
+                  color={COLORS.primary}
                 />
               ))}
             </View>
-            {touched.rentalAssistance && errors.rentalAssistance && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {submitCount > 0 && errors.rentalAssistance && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.rentalAssistance}
               </CustomText>
             )}
-          </ScrollView>
+          </View>
         );
 
       case 4:
         return (
           <View>
-            <CustomText style={{ fontWeight: "bold", fontSize: 18 }}>
+            <CustomTextBold style={styles.header}>
               4. Additional Information
-            </CustomText>
+            </CustomTextBold>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Annual Income"
-              keyboardType="numeric"
-              value={values.income}
-              onChangeText={handleChange("income")}
-              onBlur={handleBlur("income")}
-            />
-            {touched.income && errors.income && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
-                {errors.income}
-              </CustomText>
-            )}
-
-            <TextInput
-              style={styles.input}
-              placeholder="Monthly Rent"
-              keyboardType="numeric"
-              value={values.rent}
-              onChangeText={handleChange("rent")}
-              onBlur={handleBlur("rent")}
-            />
-            {touched.rent && errors.rent && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
-                {errors.rent}
-              </CustomText>
-            )}
-
-            <CustomText style={{ fontWeight: "bold" }}>
-              Total Household Size:
-            </CustomText>
-            <View style={{ flexDirection: "row" }}>
+            <CustomText style={styles.label}>Total Household Size:</CustomText>
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
               {["1", "2", "3", "4", "5+"].map((size) => (
                 <TouchableOpacity
                   key={size}
-                  style={{
-                    padding: 10,
-                    borderWidth: 1,
-                    margin: 5,
-                    borderRadius: 5,
-                    backgroundColor:
-                      values.householdSize === size ? "#007AFF" : "white",
-                  }}
+                  style={[
+                    styles.checkboxItem,
+                    {
+                      paddingHorizontal: SPACING.xl,
+                      paddingVertical: SPACING.md,
+                      margin: SPACING.xs,
+                      borderColor: values.householdSize === size ? COLORS.accent : COLORS.border,
+                      backgroundColor: values.householdSize === size ? COLORS.accentSoft : COLORS.surface,
+                    }
+                  ]}
                   onPress={() => setFieldValue("householdSize", size)}
                 >
-                  <Text
-                    style={{
-                      color: values.householdSize === size ? "white" : "black",
-                    }}
-                  >
+                  <Text style={{
+                    fontFamily: values.householdSize === size ? "Poppins-Bold" : "Poppins-Regular",
+                    color: values.householdSize === size ? COLORS.accent : COLORS.textPrimary
+                  }}>
                     {size}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
-            {touched.householdSize && errors.householdSize && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {submitCount > 0 && errors.householdSize && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.householdSize}
               </CustomText>
             )}
 
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text>Barrier Free / ADA Accessible Home:</Text>
+            <View style={styles.switchContainer}>
+              <Text style={{ fontFamily: "Poppins-Semi", fontSize: FONT_SIZE.md, color: COLORS.textPrimary, flex: 1 }}>
+                Barrier Free / ADA Accessible Home:
+              </Text>
               <Switch
                 value={values.adaAccessible || false}
                 onValueChange={(val) => setFieldValue("adaAccessible", val)}
-                style={{ marginLeft: 10 }}
+                trackColor={{ false: COLORS.gray300, true: COLORS.accentLight }}
+                thumbColor={values.adaAccessible ? COLORS.accent : COLORS.white}
               />
             </View>
 
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text>Currently living in substandard/overcrowded housing:</Text>
+            <View style={styles.switchContainer}>
+              <Text style={{ fontFamily: "Poppins-Semi", fontSize: FONT_SIZE.md, color: COLORS.textPrimary, flex: 1 }}>
+                Currently living in substandard/overcrowded housing:
+              </Text>
               <Switch
                 value={values.substandardHousing || false}
-                onValueChange={(val) => setFieldValue("substandard")}
-                style={{ marginLeft: 10 }}
+                onValueChange={(val) => setFieldValue("substandardHousing", val)}
+                trackColor={{ false: COLORS.gray300, true: COLORS.accentLight }}
+                thumbColor={values.substandardHousing ? COLORS.accent : COLORS.white}
               />
             </View>
 
-            <View style={{ alignItems: "center" }}>
-              <Text>Are any household members Veterans? :</Text>
-              <Switch
-                value={values.veteran || false}
-                onValueChange={(val) => setFieldValue("veteran", val)}
-                style={{ marginLeft: 10 }}
-              />
-              <Text>
+            <View style={{ marginVertical: SPACING.md }}>
+              <View style={[styles.switchContainer, { marginVertical: 0 }]}>
+                <Text style={{ fontFamily: "Poppins-Semi", fontSize: FONT_SIZE.md, color: COLORS.textPrimary, flex: 1 }}>
+                  Are any household members Veterans?
+                </Text>
+                <Switch
+                  value={values.householdVeteran || false}
+                  onValueChange={(val) => setFieldValue("householdVeteran", val)}
+                  trackColor={{ false: COLORS.gray300, true: COLORS.accentLight }}
+                  thumbColor={values.householdVeteran ? COLORS.accent : COLORS.white}
+                />
+              </View>
+              <Text style={styles.stepText}>
                 There are currently no units in our portfolio that provide a
                 veterans preference. We are collecting this information in the
                 event that a preference becomes available in the future.
               </Text>
             </View>
 
-            <View style={{ alignItems: "center" }}>
-              <Text>
-                Would you like to be contacted for studio apartments? *
-              </Text>
-              <Switch
-                value={values.studioContact || false}
-                onValueChange={(val) => setFieldValue("studioContact", val)}
-                style={{ marginLeft: 10 }}
-              />
-              <Text>
+            <View style={{ marginVertical: SPACING.md }}>
+              <View style={[styles.switchContainer, { marginVertical: 0 }]}>
+                <Text style={{ fontFamily: "Poppins-Semi", fontSize: FONT_SIZE.md, color: COLORS.textPrimary, flex: 1 }}>
+                  Would you like to be contacted for studio apartments? *
+                </Text>
+                <Switch
+                  value={values.studioContact || false}
+                  onValueChange={(val) => setFieldValue("studioContact", val)}
+                  trackColor={{ false: COLORS.gray300, true: COLORS.accentLight }}
+                  thumbColor={values.studioContact ? COLORS.accent : COLORS.white}
+                />
+              </View>
+              <Text style={styles.stepText}>
                 All applicants will be considered for the one bedroom
                 apartments. If you answer no, you will ONLY be contacted about
                 one bedroom apartments.
@@ -644,64 +608,54 @@ function ContactQueryform() {
       case 5:
         return (
           <View>
-            <CustomText style={{ fontWeight: "bold", fontSize: 18 }}>
-              5. Signature
-            </CustomText>
+            <CustomTextBold style={styles.header}>5. Signature</CustomTextBold>
 
+            <CustomText style={styles.inputLabel}>Electronic Signature *</CustomText>
             <TextInput
-              style={styles.input}
-              placeholder="Electronic Signature"
+              style={[styles.input, { marginTop: SPACING.xs }]}
+              placeholder="Type your full name"
               value={values.eSignature}
               onChangeText={handleChange("eSignature")}
               onBlur={handleBlur("eSignature")}
+              placeholderTextColor={COLORS.textTertiary}
             />
-            <CustomText style={{ fontWeight: "bold", fontSize: 18 }}>
+            <CustomText style={[styles.notice, { marginTop: SPACING.md }]}>
               I certify that the information provided herein is true and
               complete and that any misrepresentation of income or household
               size reported herein shall be cause for program disqualification.
               I also understand that this information is to be used only for
               determining my preliminary eligibility for referral to an
-              affordable housing unit and does not obligate me in any way.{" "}
+              affordable housing unit and does not obligate me in any way.
             </CustomText>
-
-            {touched.eSignature && errors.eSignature && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {showError("eSignature") && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.eSignature}
               </CustomText>
             )}
 
-            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <CustomText style={[styles.inputLabel, { marginTop: SPACING.lg }]}>Signature Date *</CustomText>
+            <View>
               <TextInput
-                style={styles.input}
-                placeholder="Signature Date"
-                value={
-                  values.signatureDate
-                    ? new Date(values.signatureDate).toLocaleDateString()
-                    : ""
-                }
+                style={[styles.input, { marginTop: SPACING.xs, backgroundColor: COLORS.background }]}
+                value={values.signatureDate ? new Date(values.signatureDate).toLocaleDateString() : new Date().toLocaleDateString()}
                 editable={false}
-                pointerEvents="none" // optional but useful
+                placeholderTextColor={COLORS.textTertiary}
               />
-            </TouchableOpacity>
-
-            <CustomText style={{ fontWeight: "bold", fontSize: 18 }}>
+            </View>
+            <CustomText style={[styles.notice, { marginTop: SPACING.sm }]}>
               Once we come to your name on the waiting list, you will be asked
               to verify your household composition and income, among other
-              factors. All information will be verified.{" "}
+              factors. All information will be verified.
             </CustomText>
-            {touched.signatureDate && errors.signatureDate && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+            {showError("signatureDate") && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.signatureDate}
               </CustomText>
             )}
 
             {showDatePicker && (
               <DateTimePicker
-                value={
-                  values.signatureDate
-                    ? new Date(values.signatureDate)
-                    : new Date()
-                }
+                value={values.signatureDate ? new Date(values.signatureDate) : new Date()}
                 mode="date"
                 display="default"
                 maximumDate={new Date()}
@@ -714,116 +668,162 @@ function ContactQueryform() {
               />
             )}
 
-            <CustomText style={{ marginTop: 10, fontWeight: "bold" }}>
-              How did you hear about US?
-            </CustomText>
-            {["Social Media", "Friend", "Website", "Email", "Other"].map(
-              (option) => (
+            <CustomText style={styles.label}>How did you hear about US?</CustomText>
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              {["Social Media", "Friend", "Website", "Email", "Other"].map((option) => (
                 <Checkbox.Item
                   key={option}
                   label={option}
                   status={values.hearAbout === option ? "checked" : "unchecked"}
                   onPress={() => setFieldValue("hearAbout", option)}
-                  style={{
-                    borderWidth: 1,
-                    margin: 5,
-                    borderRadius: 10,
-                    borderColor: "gray",
-                    alignItems: "center",
-                  }}
+                  style={[styles.checkboxItem, values.hearAbout === option && { borderColor: COLORS.accent, backgroundColor: COLORS.accentSoft }]}
+                  color={COLORS.primary}
                 />
-              )
-            )}
-            {touched.hearAbout && errors.hearAbout && (
-              <CustomText style={{ color: "red", marginTop: 10 }}>
+              ))}
+            </View>
+            {submitCount > 0 && errors.hearAbout && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
                 {errors.hearAbout}
+              </CustomText>
+            )}
+
+            <View style={[styles.switchContainer, { marginTop: SPACING.xl }]}>
+              <View style={{ flex: 1 }}>
+                <CustomText style={{ fontFamily: "Poppins-Semi" }}>
+                  I certify the above information is correct and agree to the terms. *
+                </CustomText>
+              </View>
+              <Switch
+                value={values.agreeTerms}
+                onValueChange={(val) => setFieldValue("agreeTerms", val)}
+                trackColor={{ false: COLORS.gray300, true: COLORS.success }}
+                thumbColor={COLORS.white}
+              />
+            </View>
+            {submitCount > 0 && errors.agreeTerms && (
+              <CustomText style={{ color: COLORS.error, marginTop: SPACING.sm }}>
+                {errors.agreeTerms}
               </CustomText>
             )}
           </View>
         );
 
-      case 6:
-        return (
-          <View style={{ padding: 20 }}>
-            <Text
-              style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}
-            >
-              Choose Your Plan
-            </Text>
-
-            <TouchableOpacity
-              style={{
-                borderWidth: 1,
-                borderColor: values.monthly ? "#4CAF50" : "#ccc",
-                backgroundColor: values.monthly ? "#e8f5e9" : "#fff",
-                padding: 15,
-                borderRadius: 8,
-                marginBottom: 10,
-              }}
-              onPress={() => {
-                setFieldValue("monthly", true);
-                setFieldValue("monthlyAmount", 29);
-                setFieldValue("yearly", false);
-                setFieldValue("yearlyAmount", 0);
-                submitContactQuery(values);
-                navigation.navigate("Payment", {
-                  name: "Premium Monthly",
-                  amount: 2900,
-                });
-              }}
-            >
-              <CustomText style={{ fontSize: 16 }}>$29 / Month</CustomText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                borderWidth: 1,
-                borderColor: values.yearly ? "#4CAF50" : "#ccc",
-                backgroundColor: values.yearly ? "#e8f5e9" : "#fff",
-                padding: 15,
-                borderRadius: 8,
-              }}
-              onPress={() => {
-                setFieldValue("monthly", false);
-                setFieldValue("monthlyAmount", 0);
-                setFieldValue("yearly", true);
-                setFieldValue("yearlyAmount", 299);
-                submitContactQuery(values);
-                navigation.navigate("Payment", {
-                  name: "Premium Yearly",
-                  amount: 29900,
-                });
-              }}
-            >
-              <CustomText style={{ fontSize: 16 }}>$299 / Year</CustomText>
-            </TouchableOpacity>
-
-            {touched.monthly === false &&
-              touched.yearly === false &&
-              errors.monthly && (
-                <CustomText
-                  style={{ color: "red", marginTop: 10, marginTop: 10 }}
-                >
-                  {errors.monthly}
-                </CustomText>
-              )}
-          </View>
-        );
       default:
         return null;
     }
   };
 
-  const totalSteps = 6;
+  const totalSteps = 5;
+
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchemas[step - 1]}
-      onSubmit={(values) => {
+      validateOnMount={false}       // FIX 1: Do NOT validate on mount
+      validateOnChange={true}
+      validateOnBlur={true}
+      onSubmit={async (values, { setSubmitting }) => {
         if (step === validationSchemas.length) {
-          submitContactQuery(values);
+          const formatBool = (val) => (val === true || val === "Yes" ? "Yes" : "No");
+          const cleanNum = (val) => {
+            if (typeof val === "number") return val;
+            if (!val) return 0;
+            return Number(val.toString().replace(/[^0-9.]/g, "")) || 0;
+          };
+
+          const finalValues = {
+            // --- STRICT BACKEND REQUIREMENTS (27 FIELDS) ---
+            // 1-5
+            property: values.property_id || values.property || "",
+            salutation: values.salutation,
+            firstName: values.firstName,
+            lastName: values.lastName,
+            email: values.email,
+            // 6-10
+            phone: values.phone,
+            address1: values.address1,
+            city2: values.city,
+            state2: values.state,
+            headName: values.headName || `${values.firstName} ${values.lastName}`.trim(),
+            // 11-15
+            dob: values.dob ? new Date(values.dob).toISOString().split("T")[0] : "",
+            gender: values.gender,
+            secondPerson: formatBool(values.secondPerson),
+            njResident: formatBool(values.njResident),
+            grossIncome: cleanNum(values.grossIncome),
+            // 16-20
+            monthlyRent: cleanNum(values.monthlyRent),
+            veteran: values.veteran === "Yes", // Use the Step 3 radio selection
+            section8: formatBool(values.section8),
+            rentalAssistance: formatBool(values.rentalAssistance),
+            income: cleanNum(values.grossIncome),
+            // 21-25
+            rent: cleanNum(values.monthlyRent),
+            householdSize: values.householdSize,
+            eSignature: values.eSignature,
+            signatureDate: values.signatureDate ? new Date(values.signatureDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+            hearAbout: values.hearAbout,
+            // 26-27 (CRITICAL MISSING FIELDS)
+            monthlyAmount: cleanNum(values.monthlyRent),
+            yearlyAmount: cleanNum(values.grossIncome),
+
+            // --- Snake Case Aliases (For legacy/extra safety) ---
+            user_id: user?._id || user?.id || "",
+            userId: user?._id || user?.id || "",
+            first_name: values.firstName,
+            last_name: values.lastName,
+            middle_name: values.middleName || "",
+            extension: values.extension || "",
+            suffix: values.suffix || "",
+            address_line_1: values.address1,
+            address_line_2: values.address2 || "",
+            city: values.city, // Keep original city for consistency
+            state: values.state, // Keep original state for consistency
+            zip_code: values.zipCode,
+            zipCode: values.zipCode,
+            combined_gross_income: cleanNum(values.grossIncome),
+            monthly_rent_payment: cleanNum(values.monthlyRent),
+            annual_income: cleanNum(values.grossIncome),
+            monthly_rent: cleanNum(values.monthlyRent),
+            disabled: formatBool(values.disabled),
+            adaAccessible: formatBool(values.adaAccessible),
+            substandardHousing: formatBool(values.substandardHousing),
+            householdVeteran: formatBool(values.householdVeteran),
+            studioContact: formatBool(values.studioContact),
+            full_name: `${values.firstName} ${values.lastName}`.trim(),
+            signature_date: values.signatureDate
+              ? new Date(values.signatureDate).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
+            application_date: new Date().toISOString().split("T")[0],
+            application_type: "pre-application",
+            property_id: values.property_id || values.property || "",
+            propertyId: values.propertyId || values.property || "",
+            phone_number: values.phone,
+            email_address: values.email,
+            hear_about: values.hearAbout,
+            terms_accepted: values.agreeTerms ? "Yes" : "No",
+
+            second_person: formatBool(values.secondPerson),
+            nj_resident: formatBool(values.njResident),
+            section_8: formatBool(values.section8),
+            rental_assistance: formatBool(values.rentalAssistance),
+            household_size: values.householdSize,
+            e_signature: values.eSignature,
+            signature_date_string: values.signatureDate ? new Date(values.signatureDate).toLocaleDateString() : new Date().toLocaleDateString(),
+            
+            // String versions of financials
+            income_string: values.grossIncome.toString(),
+            rent_string: values.monthlyRent.toString(),
+            gross_income: values.grossIncome,
+          };
+
+          console.log("--- SENDING PAYLOAD ---");
+          console.log(JSON.stringify(finalValues, null, 2));
+
+          await submitContactQuery(finalValues, navigation, setSubmitting);
         } else {
           setStep(step + 1);
+          setSubmitting(false);
         }
       }}
     >
@@ -835,143 +835,219 @@ function ContactQueryform() {
         handleBlur,
         handleSubmit,
         setFieldValue,
-      }) => (
-        <>
-          <ScrollView style={{ padding: 20, backgroundColor: "white" }}>
-            {renderStep({
-              values,
-              errors,
-              touched,
-              handleChange,
-              handleBlur,
-              setFieldValue,
-            })}
-          </ScrollView>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              margin: 10,
-            }}
-          >
-            {step > 1 && (
-              <TouchableOpacity
-                onPress={() => setStep(step - 1)}
-                style={{
-                  padding: 10,
-                  backgroundColor: "#ccc",
-                  borderRadius: 5,
-                  minWidth: 100,
-                  alignItems: "center",
-                }}
-              >
-                <Text>Back</Text>
-              </TouchableOpacity>
-            )}
+        isSubmitting,
+        submitCount,
+        isValid,
+      }) => {
+        // Sync headName from firstName + lastName
+        useEffect(() => {
+          if (!values.headName && (values.firstName || values.lastName)) {
+            setFieldValue("headName", `${values.firstName} ${values.lastName}`.trim());
+          }
+        }, [values.firstName, values.lastName]);
 
-            <TouchableOpacity
-              onPress={handleSubmit}
-              style={{
-                padding: 10,
-                backgroundColor: "#007AFF",
-                borderRadius: 5,
-                minWidth: 100,
-                alignItems: "center",
-              }}
+        // LOGGING: Show all validation errors in console for debugging
+        useEffect(() => {
+          if (Object.keys(errors).length > 0) {
+            console.log("--- FORM VALIDATION ERRORS ---");
+            console.log(JSON.stringify(errors, null, 2));
+          }
+        }, [errors]);
+
+        return (
+          <>
+            <ProgressBar currentStep={step} totalSteps={totalSteps} />
+            <ScrollView
+              style={styles.container}
+              contentContainerStyle={{ paddingBottom: 150 }}
             >
-              <CustomText style={{ color: "white" }}>
-                {step === validationSchemas.length ? "Submit" : "Next"}
-              </CustomText>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
+              {renderStep({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleBlur,
+                setFieldValue,
+                submitCount,  // FIX 3: Pass submitCount to renderStep
+              })}
+            </ScrollView>
+
+            <View style={styles.buttonRow}>
+              {step > 1 ? (
+                <TouchableOpacity
+                  onPress={() => setStep(step - 1)}
+                  style={[styles.navButton, { backgroundColor: COLORS.surface, borderColor: COLORS.border, borderWidth: 1 }]}
+                >
+                  <Text style={[styles.navButtonText, { color: COLORS.textPrimary }]}>Back</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={{ width: 120 }} />
+              )}
+
+              {/* FIX 4: Removed stale errors check + Alert. Just call handleSubmit */}
+              <TouchableOpacity
+                onPress={() => handleSubmit()}
+                disabled={isSubmitting || !isValid}
+                style={[
+                  styles.navButton,
+                  { backgroundColor: (isSubmitting || !isValid) ? COLORS.gray300 : COLORS.primary }
+                ]}
+              >
+                <CustomText style={[styles.navButtonText, { color: (isSubmitting || !isValid) ? COLORS.textSecondary : COLORS.white }]}>
+                  {isSubmitting ? "Submitting..." : step === validationSchemas.length ? "Submit" : "Next"}
+                </CustomText>
+              </TouchableOpacity>
+            </View>
+
+            {/* Only show error count after user has tried to submit */}
+            {Object.keys(errors).length > 0 && (
+              <View style={{ paddingHorizontal: SPACING.lg, paddingBottom: SPACING.xl, alignItems: "center" }}>
+                <CustomText style={{ color: COLORS.error, fontSize: FONT_SIZE.md, textAlign: 'center', fontWeight: 'bold' }}>
+                  Required Fields Missing:
+                </CustomText>
+                {Object.keys(errors).map((key) => (
+                  <CustomText key={key} style={{ color: COLORS.error, fontSize: FONT_SIZE.sm }}>
+                    • {errors[key]}
+                  </CustomText>
+                ))}
+              </View>
+            )}
+          </>
+        );
+      }}
     </Formik>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: "white",
+    padding: SPACING.lg,
+    backgroundColor: COLORS.background,
     flexGrow: 1,
   },
   header: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
+    fontSize: FONT_SIZE.xxl,
+    fontFamily: "Poppins-Bold",
+    color: COLORS.textPrimary,
+    marginVertical: SPACING.md,
   },
   notice: {
-    marginBottom: 15,
-    fontStyle: "italic",
-    color: "#333",
+    marginBottom: SPACING.md,
+    color: COLORS.textSecondary,
+    fontSize: FONT_SIZE.md,
+    fontFamily: "Poppins-Regular",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 20,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    fontSize: FONT_SIZE.md,
+    backgroundColor: COLORS.surface,
+    marginTop: SPACING.lg,
+    color: COLORS.textPrimary,
   },
   progress: {
     height: 10,
-    marginBottom: 20,
-    borderRadius: 5,
+    marginBottom: SPACING.xl,
+    borderRadius: BORDER_RADIUS.pill,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginVertical: 15,
+    marginTop: SPACING.lg,
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.xxxl,
   },
   label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 20,
-    marginBottom: 10,
+    fontSize: FONT_SIZE.lg,
+    fontFamily: "Poppins-Semi",
+    color: COLORS.textPrimary,
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.sm,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-    marginTop: 20,
+  inputLabel: {
+    fontSize: FONT_SIZE.md,
+    fontFamily: "Poppins-Semi",
+    color: COLORS.textSecondary,
+    marginTop: SPACING.md,
+    marginLeft: 4,
   },
   radioGroup: {
     flexDirection: "row",
-    marginBottom: 15,
+    marginBottom: SPACING.md,
     justifyContent: "center",
     alignItems: "center",
   },
   checkboxItem: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: COLORS.surface,
     marginVertical: 4,
-    borderRadius: 6,
+    borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: "#ddd",
-    paddingLeft: 8,
+    borderColor: COLORS.border,
+    paddingLeft: SPACING.sm,
   },
+  // FIX 6: Added flexDirection: "row" which was missing — caused Switch to overlap text
   switchContainer: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginVertical: 15,
+    marginVertical: SPACING.md,
   },
   progressBar: {
     height: 10,
-    backgroundColor: "#4CAF50",
-    borderRadius: 5,
-    width: "0%", // Default width
+    backgroundColor: COLORS.success,
+    borderRadius: BORDER_RADIUS.pill,
   },
   stepText: {
-    marginTop: 5,
-    fontSize: 16,
+    marginTop: SPACING.xs,
+    fontSize: FONT_SIZE.md,
+    color: COLORS.textSecondary,
+  },
+  activePlan: {
+    borderColor: COLORS.success,
+    backgroundColor: COLORS.successLight,
+  },
+  inactivePlan: {
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.surface,
+  },
+  planCard: {
+    borderWidth: 1,
+    padding: SPACING.xl,
+    borderRadius: BORDER_RADIUS.lg,
+    marginBottom: SPACING.md,
+    ...SHADOWS.small,
+  },
+  navButton: {
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: BORDER_RADIUS.pill,
+    minWidth: 120,
+    alignItems: "center",
+    justifyContent: "center",
+    ...SHADOWS.small,
+  },
+  navButtonText: {
+    fontSize: FONT_SIZE.md,
+    fontFamily: "Poppins-Bold",
+  },
+  amountInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: COLORS.surface,
+    marginTop: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+  },
+  dollarIcon: {
+    fontSize: FONT_SIZE.lg,
+    color: COLORS.textSecondary,
+    fontFamily: "Poppins-Semi",
+    marginRight: SPACING.xs,
   },
 });
 

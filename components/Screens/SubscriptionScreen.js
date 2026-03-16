@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,15 +9,20 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { COLORS, SPACING, FONT_SIZE, BORDER_RADIUS, SHADOWS } from "../../utils/theme";
+import CustomTextBold from "../common/BoldCustomtext";
+import CustomText from "../common/Text";
 
 const SubscriptionScreen = () => {
+  const [selectedPlan, setSelectedPlan] = useState("monthly");
   const route = useRoute();
   const { title, address } = route?.params ?? "";
   const navigation = useNavigation();
-  const handleSubscribe = () => {
-    navigation.navigate("Contact_now", {
-      title: title,
-      address: address,
+  const handleSubscribe = (method) => {
+    navigation.navigate("Payment", {
+      name: selectedPlan === "monthly" ? "Premium Monthly" : "Premium Annual",
+      amount: selectedPlan === "monthly" ? 2900 : 29900,
+      method: method, // Pass whether it's stripe or paypal
     });
   };
 
@@ -50,46 +55,86 @@ const SubscriptionScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.header}>Choose Your Plan</Text>
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <CustomTextBold style={styles.header}>Choose Your Plan</CustomTextBold>
+        <CustomText style={styles.subtitle}>Unlock the best of NJ Housing with a premium subscription.</CustomText>
 
         <View style={styles.card}>
-          <Text style={[styles.planTitle, { color: "#000" }]}>Free Plan</Text>
+          <CustomTextBold style={[styles.planTitle, { color: COLORS.textPrimary }]}>Free Plan</CustomTextBold>
           <View style={styles.feature}>
-            <Ionicons name="checkmark-circle" size={20} color="#051138" />
-            <Text style={styles.featureText}>
+            <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />
+            <CustomText style={styles.featureText}>
               View all listings (no pricing)
-            </Text>
+            </CustomText>
           </View>
           <View style={styles.feature}>
-            <Ionicons name="checkmark-circle" size={20} color="#051138" />
-            <Text style={styles.featureText}>
+            <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />
+            <CustomText style={styles.featureText}>
               Create account & save preferences
-            </Text>
+            </CustomText>
           </View>
         </View>
 
         <View style={[styles.card, styles.premiumCard]}>
-          <Text style={styles.planTitle}>Premium Plan</Text>
-          <Text style={styles.price}>$29 / month</Text>
-          <Text style={styles.price}>$299 / annual</Text>
+          <CustomTextBold style={styles.planTitlePremium}>Premium Plan</CustomTextBold>
+          <View style={styles.planOptionsContainer}>
+            <TouchableOpacity
+              style={[styles.planOption, selectedPlan === "monthly" && styles.selectedPlanOption]}
+              onPress={() => setSelectedPlan("monthly")}
+            >
+              <View style={styles.radioCircle}>
+                {selectedPlan === "monthly" && <View style={styles.radioInner} />}
+              </View>
+              <View style={{flexDirection: "row", alignItems: "baseline"}}>
+                <CustomTextBold style={styles.price}>$29</CustomTextBold>
+                <CustomText style={{color: COLORS.white, fontSize: FONT_SIZE.md}}> / month</CustomText>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.planOption, selectedPlan === "annual" && styles.selectedPlanOption]}
+              onPress={() => setSelectedPlan("annual")}
+            >
+              <View style={styles.radioCircle}>
+                {selectedPlan === "annual" && <View style={styles.radioInner} />}
+              </View>
+              <View style={{flexDirection: "row", alignItems: "baseline"}}>
+                <CustomTextBold style={styles.priceAnnual}>$299</CustomTextBold>
+                <CustomText style={{color: COLORS.white, fontSize: FONT_SIZE.sm}}> / annual</CustomText>
+              </View>
+            </TouchableOpacity>
+          </View>
 
           {premiumFeatures.map((feature, index) => (
             <View key={index} style={styles.feature}>
-              <Ionicons name={feature.icon} size={20} color="#fff" />
-              <Text style={styles.featureTextPremium}>{feature.text}</Text>
+              <Ionicons name={feature.icon} size={20} color={COLORS.gold} />
+              <CustomText style={styles.featureTextPremium}>{feature.text}</CustomText>
             </View>
           ))}
         </View>
-        {/* Pre-Application Button */}
-        <TouchableOpacity style={styles.button} onPress={handleSubscribe}>
-          <Text style={styles.buttonText}>Start Pre-Application</Text>
-        </TouchableOpacity>
+        {/* Payment Options */}
+        <View style={styles.paymentButtonContainer}>
+          <TouchableOpacity 
+            style={[styles.button, styles.stripeButton]} 
+            onPress={() => handleSubscribe("stripe")}
+          >
+            <Ionicons name="card" size={20} color={COLORS.white} style={{marginRight: 8}} />
+            <CustomTextBold style={styles.buttonText}>Pay with Card (Stripe)</CustomTextBold>
+          </TouchableOpacity>
 
-        <Text style={styles.disclaimer}>
+          <TouchableOpacity 
+            style={[styles.button, styles.paypalButton]} 
+            onPress={() => handleSubscribe("paypal")}
+          >
+            <Ionicons name="logo-paypal" size={20} color="#003087" style={{marginRight: 8}} />
+            <CustomTextBold style={[styles.buttonText, {color: "#003087"}]}>Pay with PayPal</CustomTextBold>
+          </TouchableOpacity>
+        </View>
+
+        <CustomText style={styles.disclaimer}>
           Cancel anytime. Applications will be submitted manually on 3rd-party
           portals with your consent.
-        </Text>
+        </CustomText>
       </ScrollView>
     </SafeAreaView>
   );
@@ -98,74 +143,135 @@ const SubscriptionScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f4f4f4",
+    backgroundColor: COLORS.background,
   },
   container: {
-    padding: 20,
+    padding: SPACING.xl,
     alignItems: "center",
   },
   header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginVertical: 20,
-    color: "#051138",
+    fontSize: FONT_SIZE.xxxl,
+    marginVertical: SPACING.sm,
+    color: COLORS.primary,
+  },
+  subtitle: {
+    fontSize: FONT_SIZE.md,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    marginBottom: SPACING.xl,
   },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.xxl,
     width: "100%",
-    marginBottom: 20,
-    elevation: 3,
+    marginBottom: SPACING.xl,
+    ...SHADOWS.medium,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
   premiumCard: {
-    backgroundColor: "#051138",
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+    ...SHADOWS.large,
   },
   planTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "#fff",
+    fontSize: FONT_SIZE.xxl,
+    marginBottom: SPACING.lg,
+  },
+  planTitlePremium: {
+    fontSize: FONT_SIZE.xxl,
+    marginBottom: SPACING.lg,
+    color: COLORS.gold,
   },
   price: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 15,
-    color: "#fff",
+    fontSize: FONT_SIZE.xxxl,
+    color: COLORS.white,
+  },
+  priceAnnual: {
+    fontSize: FONT_SIZE.xl,
+    color: COLORS.white,
+    opacity: 0.9,
   },
   feature: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: SPACING.md,
   },
   featureText: {
-    marginLeft: 10,
-    fontSize: 16,
-    color: "#333",
+    marginLeft: SPACING.sm,
+    fontSize: FONT_SIZE.md,
+    color: COLORS.textPrimary,
   },
   featureTextPremium: {
-    marginLeft: 10,
-    fontSize: 16,
-    color: "#fff",
+    marginLeft: SPACING.sm,
+    fontSize: FONT_SIZE.md,
+    color: COLORS.white,
   },
   button: {
-    backgroundColor: "#051138",
-    paddingVertical: 15,
-    paddingHorizontal: 50,
-    borderRadius: 30,
-    marginTop: 20,
+    backgroundColor: COLORS.accent,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xxl,
+    borderRadius: BORDER_RADIUS.pill,
+    width: "100%",
+    alignItems: "center",
+    marginTop: SPACING.md,
+    ...SHADOWS.medium,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
+    color: COLORS.white,
+    fontSize: FONT_SIZE.lg,
   },
   disclaimer: {
-    fontSize: 12,
-    color: "#666",
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.textSecondary,
     textAlign: "center",
-    marginTop: 20,
-    paddingHorizontal: 20,
+    marginTop: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
+  },
+  paymentButtonContainer: {
+    width: "100%",
+    gap: SPACING.md,
+  },
+  stripeButton: {
+    backgroundColor: COLORS.accent,
+    flexDirection: "row",
+  },
+  paypalButton: {
+    backgroundColor: "#FFC439",
+    flexDirection: "row",
+  },
+  planOptionsContainer: {
+    marginBottom: SPACING.lg,
+  },
+  planOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.md,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  selectedPlanOption: {
+    borderColor: COLORS.gold,
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  radioCircle: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: SPACING.md,
+  },
+  radioInner: {
+    height: 10,
+    width: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.gold,
   },
 });
 

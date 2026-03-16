@@ -6,191 +6,243 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  Image,
+  ImageBackground,
   Dimensions,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { loginApi } from "../../../utils/apicalls/loginApi";
-import { Button } from "react-native-paper";
+import { useDispatch } from "react-redux";
+import CustomLogo from "../../CustomLogo";
 import CustomText from "../../common/Text";
 import CustomTextSemi from "../../common/CustomTextSemi";
-import { useDispatch, useSelector } from "react-redux";
-import CustomLogo from "../../CustomLogo";
+import { COLORS, SHADOWS, BORDER_RADIUS, SPACING, FONT_SIZE } from "../../../utils/theme";
+import { LinearGradient } from "expo-linear-gradient";
+
+const { height } = Dimensions.get("window");
+
 export default function LoginScreen() {
-  const { width, height } = Dimensions.get("screen");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
-  const [error, setErros] = useState("");
+  const [error, setError] = useState("");
 
   const dispatch = useDispatch();
   const handleLogin = () => {
-    loginApi(email, password, navigation, setErros, setLoading, dispatch);
+    loginApi(email, password, navigation, setError, setLoading, dispatch);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <CustomLogo
-        image={require("../../../assets/images/logo_comp/nj_house_map.png")}
-      />
-      <View style={{ padding: 25 }}>
-        <CustomTextSemi
-          style={[
-            styles.title,
-            {
-              marginBottom: 5,
-            },
-          ]}
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      <ImageBackground
+        source={require("../../../assets/images/background/premium_bg.png")}
+        style={styles.backgroundImage}
+      >
+        <LinearGradient
+          colors={["rgba(5, 17, 56, 0.2)", "rgba(5, 17, 56, 0.8)"]}
+          style={styles.gradient}
         >
-          Sign in
-        </CustomTextSemi>
-        <CustomText style={[styles.title, { fontSize: 18, color: "#696969" }]}>
-          Welcome back! Sign in to continue.
-        </CustomText>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Your email"
-          placeholderTextColor="#999"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.inputPassword}
-            placeholder="Password"
-            placeholderTextColor="#999"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-          />
-
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Ionicons
-              name={showPassword ? "eye" : "eye-off"}
-              size={24}
-              color="#999"
-            />
-          </TouchableOpacity>
-        </View>
-        {error && (
-          <View
-            style={{
-              padding: 5,
-            }}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
           >
-            <CustomText style={{ color: "#FF5D5D" }}>{error}</CustomText>
-          </View>
-        )}
-        <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
-          <Text style={{ color: "white", fontSize: 18 }}>
-            {loading ? (
-              <ActivityIndicator color="white" size={"small"} />
-            ) : (
-              "Login"
-            )}
-          </Text>
-        </TouchableOpacity>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+              <SafeAreaView style={styles.content}>
+                <View style={styles.logoContainer}>
+                  <CustomLogo
+                    color={COLORS.white}
+                    image={require("../../../assets/images/logo_comp/nj_house_map.png")}
+                  />
+                  <CustomText style={styles.tagline}>Access Affordable Living</CustomText>
+                </View>
 
-        <CustomText style={styles.signupPrompt}>
-          Don’t have an account?
-        </CustomText>
+                <View style={styles.card}>
+                  <CustomTextSemi style={styles.title}>Welcome Back</CustomTextSemi>
+                  <CustomText style={styles.subtitle}>Sign in to your account to continue</CustomText>
 
-        <Button
-          style={styles.signupButton}
-          onPress={() => navigation.navigate("Signup")}
-        >
-          <CustomText style={styles.signupText}>Create an Account</CustomText>
-        </Button>
-      </View>
-    </SafeAreaView>
+                  <View style={styles.inputWrapper}>
+                    <Ionicons name="mail-outline" size={20} color={COLORS.gray400} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Email Address"
+                      placeholderTextColor={COLORS.textTertiary}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      value={email}
+                      onChangeText={setEmail}
+                    />
+                  </View>
+
+                  <View style={styles.inputWrapper}>
+                    <Ionicons name="lock-closed-outline" size={20} color={COLORS.gray400} style={styles.inputIcon} />
+                    <TextInput
+                      style={[styles.input, { flex: 1 }]}
+                      placeholder="Password"
+                      placeholderTextColor={COLORS.textTertiary}
+                      secureTextEntry={!showPassword}
+                      value={password}
+                      onChangeText={setPassword}
+                    />
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                      <Ionicons
+                        name={showPassword ? "eye-outline" : "eye-off-outline"}
+                        size={20}
+                        color={COLORS.gray500}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  {error ? (
+                    <View style={styles.errorContainer}>
+                      <Ionicons name="alert-circle-outline" size={16} color={COLORS.error} />
+                      <CustomText style={styles.errorText}>{error}</CustomText>
+                    </View>
+                  ) : null}
+
+                  <TouchableOpacity 
+                    onPress={handleLogin} 
+                    style={[styles.loginButton, loading && styles.disabledButton]}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color={COLORS.white} size="small" />
+                    ) : (
+                      <Text style={styles.loginButtonText}>Login</Text>
+                    )}
+                  </TouchableOpacity>
+
+                  <View style={styles.footer}>
+                    <CustomText style={styles.footerText}>Don't have an account?</CustomText>
+                    <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                      <CustomTextSemi style={styles.signupLink}> Sign Up</CustomTextSemi>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </SafeAreaView>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </LinearGradient>
+      </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  image: {
-    width: 100,
-    height: 100,
-  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    justifyContent: "center",
+    backgroundColor: COLORS.primary,
   },
-  titleBrand: {
-    fontSize: 24,
-    color: "#1F1D5B",
-    fontWeight: "500",
-    marginBottom: 4,
+  backgroundImage: {
+    flex: 1,
+  },
+  gradient: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginTop: height * 0.1,
+  },
+  tagline: {
+    color: "rgba(255, 255, 255, 0.7)",
+    marginTop: SPACING.sm,
+    fontSize: FONT_SIZE.md,
+    fontFamily: "Poppins-Regular",
+  },
+  card: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingHorizontal: SPACING.xxxl,
+    paddingTop: SPACING.xxxl,
+    paddingBottom: Platform.OS === "ios" ? 50 : 30,
+    ...SHADOWS.large,
   },
   title: {
-    fontSize: 40,
-    color: "#1F1D5B",
-    marginBottom: 20,
+    fontSize: 28,
+    color: COLORS.primary,
+    marginBottom: SPACING.xs,
   },
-  label: {
-    fontSize: 12,
-    color: "#999",
-    marginBottom: 6,
+  subtitle: {
+    fontSize: FONT_SIZE.md,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xxl,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.gray50,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    height: 56,
+  },
+  inputIcon: {
+    marginRight: SPACING.md,
   },
   input: {
-    backgroundColor: "#F2F2F2",
-    borderRadius: 8,
-    padding: 14,
-    fontSize: 16,
-    marginBottom: 20,
-    height: 50,
-  },
-  passwordContainer: {
-    backgroundColor: "#F2F2F2",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  inputPassword: {
     flex: 1,
     fontSize: 16,
-    height: 50,
+    color: COLORS.textPrimary,
+    fontFamily: "Poppins-Regular",
+  },
+  eyeIcon: {
+    padding: SPACING.xs,
+  },
+  errorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.lg,
+  },
+  errorText: {
+    color: COLORS.error,
+    marginLeft: SPACING.xs,
+    fontSize: FONT_SIZE.sm,
   },
   loginButton: {
-    backgroundColor: "#1F1D5B",
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 24,
-    height: 45,
+    backgroundColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.md,
+    height: 56,
     justifyContent: "center",
-    color: "white",
-    marginTop: 20,
-  },
-  loginText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "600",
-  },
-  signupPrompt: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#000",
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  signupButton: {
-    borderWidth: 1,
-    borderColor: "#242933",
-    borderRadius: 8,
     alignItems: "center",
+    marginTop: SPACING.md,
+    ...SHADOWS.medium,
   },
-  signupText: {
-    color: "#242933",
-    fontSize: 16,
+  disabledButton: {
+    opacity: 0.7,
+  },
+  loginButtonText: {
+    color: COLORS.white,
+    fontSize: 18,
+    fontFamily: "Poppins-Bold",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: SPACING.xl,
+  },
+  footerText: {
+    color: COLORS.textSecondary,
+    fontSize: FONT_SIZE.md,
+  },
+  signupLink: {
+    color: COLORS.accent,
+    fontSize: FONT_SIZE.md,
   },
 });

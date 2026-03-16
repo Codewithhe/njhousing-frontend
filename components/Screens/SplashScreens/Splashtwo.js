@@ -3,113 +3,63 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
   ImageBackground,
   StatusBar,
+  Dimensions,
 } from "react-native";
-import React, { useEffect } from "react";
-import { Button } from "react-native-paper";
+import React from "react";
 import { useNavigation } from "@react-navigation/native";
-import CustomTextBold from "../../common/BoldCustomtext";
+import { LinearGradient } from "expo-linear-gradient";
 import CustomText from "../../common/Text";
-import Botttombar from "./Botttombar";
 import CustomLogo from "../../CustomLogo";
-import { Entypo } from "react-native-vector-icons";
+import Botttombar from "./Botttombar";
+import { COLORS, FONT_SIZE, FONT_FAMILY, SPACING } from "../../../utils/theme";
+
+const { height } = Dimensions.get("window");
 
 const Splashtwo = () => {
   const navigation = useNavigation();
 
-  useEffect(() => {
-    async function loadFonts() {
-      await Font.loadAsync({
-        "Hind-Jalandhar": require("../../../assets/fonts/Hind/Hind-Regular.ttf"),
-      });
-      setFontsLoaded(true);
-    }
-    loadFonts();
-  }, []);
   return (
-    <ImageBackground style={[styles.container, {
-      flex: 1,
-      justifyContent: "space-between",
-      backgroundColor: "white"
-    }]} source={require("../../../assets/images/background/splash.png")}>
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="white" />
-
-        <View style={{ marginHorizontal: 50 }}>
-          <CustomLogo
-            image={require("../../../assets/images/logo_comp/nj_house_map.png")}
-          />
-          <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <CustomText
-              style={[
-                styles.text,
-                {
-                  fontSize: 25,
-                  marginTop: 30,
-                  fontWeight: "200",
-                },
-              ]}
-            >
-              Affordable Housing,
-            </CustomText>
-            <CustomText
-              style={[
-                styles.text,
-                {
-                  fontSize: 24,
-                  fontWeight: "200",
-                },
-              ]}
-            >
-             Search, Apply, and Connect
-
-            </CustomText>
-            <Text
-              style={[
-                styles.text,
-                {
-                  fontSize: 15,
-                  color: "gray",
-                  marginTop: 30,
-                  fontWeight: "200",
-                  textAlign: "center",
-                },
-              ]}
-            >
-           Easily search for housing options, check eligibility, and connect with landlords and housing authorities — hassle-free.
-            </Text>
-
-            {/* <Button
-              mode="contained"
-              outlineColor="#6246ea"
-              onPress={() => navigation.navigate("Splashthree")}
-              buttonColor="#051138"
-              style={{
-                width: 300,
-                borderColor: "#6246ea",
-
-                marginHorizontal: 20,
-                marginTop: 20,
-                marginRight: 20,
-              }}
-            >
-              Next{" "}
-              <Entypo name="chevron-thin-right" style={{ marginLeft: 10 }} />
-            </Button> */}
-          </View>
-        </View>
-      </SafeAreaView>
-
-      <View
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      <ImageBackground
+        style={styles.backgroundImage}
+        source={require("../../../assets/images/onboarding/ob2.png")}
       >
-        <Botttombar
-          title="Next"
-          navigation={() => navigation.navigate("Splashthree")}
-        />
-      </View>
-    </ImageBackground>
+        <LinearGradient
+          colors={["transparent", "rgba(5, 17, 56, 0.4)", "rgba(5, 17, 56, 1)"]}
+          style={styles.gradient}
+        >
+          <SafeAreaView style={styles.content}>
+            <View style={styles.topSection}>
+              <CustomLogo
+                color={COLORS.white}
+                image={require("../../../assets/images/logo_comp/nj_house_map.png")}
+              />
+            </View>
+
+            <View style={styles.textSection}>
+              <CustomText style={styles.title}>
+                Search, Apply,{"\n"}
+                <Text style={styles.titleBold}>and Connect.</Text>
+              </CustomText>
+              
+              <Text style={styles.description}>
+                Easily search for housing options and connect with landlords — all hassle-free.
+              </Text>
+            </View>
+
+            <View style={styles.bottomSection}>
+              <Botttombar
+                title="Next"
+                navigation={() => navigation.navigate("Splashthree")}
+              />
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </ImageBackground>
+    </View>
   );
 };
 
@@ -118,20 +68,47 @@ export default Splashtwo;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: COLORS.primary,
+  },
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  gradient: {
+    flex: 1,
   },
   content: {
-    justifyContent: "center",
-    width: "100%",
-    height: 600,
-    // alignItems: "center",
-    position: "absolute",
+    flex: 1,
+    justifyContent: "space-between",
   },
-  text: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "black",
-    textAlign: "center",
+  topSection: {
+    paddingTop: height * 0.05,
+    alignItems: "center",
+  },
+  textSection: {
+    paddingHorizontal: SPACING.xxxl,
+    marginBottom: SPACING.xl,
+  },
+  title: {
+    fontSize: 28,
+    color: COLORS.white,
+    lineHeight: 38,
+    fontFamily: FONT_FAMILY.light,
+  },
+  titleBold: {
+    fontSize: 34,
+    color: COLORS.white,
+    fontFamily: FONT_FAMILY.bold,
+  },
+  description: {
+    fontSize: FONT_SIZE.md,
+    color: "rgba(255, 255, 255, 0.8)",
+    marginTop: SPACING.lg,
+    lineHeight: 24,
+    fontFamily: FONT_FAMILY.regular,
+  },
+  bottomSection: {
+    paddingBottom: SPACING.xl,
   },
 });

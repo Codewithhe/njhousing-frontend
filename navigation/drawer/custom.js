@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import CustomLogo from "../../components/CustomLogo";
 import {
@@ -9,8 +9,10 @@ import {
   MaterialIcons,
   Foundation,
 } from "react-native-vector-icons";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import { clearUser } from "../../redux/slices/user";
+import { COLORS } from "../../utils/theme";
 
 const drawerItems = [
   {
@@ -33,25 +35,6 @@ const drawerItems = [
     screen: "ApplicationsScreen",
   },
   {
-    id: "videos",
-    icon: <Entypo name="video" size={18} color="#951627" />,
-    label: "Diane’s Videos",
-    screen: "VideosScreen",
-  },
-  {
-    id: "vault",
-    icon: <Ionicons name="document-lock-sharp" size={18} color="#951627" />,
-    label: "Document Vault",
-    screen: "VaultScreen",
-  },
-  {
-    id: "notifications",
-    icon: <Entypo name="notification" size={18} color="#951627" />,
-
-    label: "Notifications Center",
-    screen: "NotificationsScreen",
-  },
-  {
     id: "help",
     icon: <Entypo name="help-with-circle" size={18} color="#951627" />,
     label: "Help & FAQs",
@@ -68,9 +51,7 @@ const drawerItems = [
     id: "upgrade",
     label: "Upgrade to Premium",
     icon: <MaterialIcons name="workspace-premium" size={18} color="#951627" />,
-
     screen: "UpgradeScreen",
-    optional: true,
   },
 ];
 const drawerItemsPre = [
@@ -129,39 +110,61 @@ const drawerItemsPre = [
 const CustomDrawer = (props) => {
   const user = useSelector((state) => state.user);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   const drawer =
     user?.user?.premiumEnabled === true ? drawerItemsPre : drawerItems;
+
   return (
-    <DrawerContentScrollView
-      {...props}
-      contentContainerStyle={styles.container}
-    >
-      <View>
+    <View style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <View style={styles.drawerHeader}>
           <CustomLogo
             image={require("../../assets/images/logo_comp/nj_house_map.png")}
           />
         </View>
-        <View>
-          {drawer.map((item) => (
-            <View>
-              <DrawerItem
-                label={item.label}
-                icon={({ color, size }) => item.icon}
-                labelStyle={styles.drawerLabel}
-                // onPress={() => console.log(item.navigation)}
-                onPress={() => navigation.navigate(item.screen)}
-              />
-            </View>
-          ))}
+        <View style={{ flex: 1 }}>
+          <DrawerContentScrollView {...props} style={{ flex: 1 }}>
+            {drawer.map((item) => (
+              <View key={item.id}>
+                <DrawerItem
+                  label={item.label}
+                  icon={({ color, size }) => item.icon}
+                  labelStyle={styles.drawerLabel}
+                  onPress={() => navigation.navigate(item.screen)}
+                />
+              </View>
+            ))}
+          </DrawerContentScrollView>
         </View>
       </View>
 
+      <View style={{ paddingBottom: 20 }}>
+        <DrawerItem
+          label="Logout"
+          icon={({ color, size }) => (
+            <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
+          )}
+          labelStyle={[styles.drawerLabel, { color: COLORS.error, fontWeight: "bold" }]}
+          onPress={() => {
+            dispatch(clearUser());
+            navigation.replace("Splash");
+          }}
+        />
+      </View>
+
       <View style={styles.footer}>
+        <TouchableOpacity 
+          style={styles.preAppButton}
+          onPress={() => navigation.navigate("Contact_now")}
+        >
+          <MaterialCommunityIcons name="form-select" size={20} color="#fff" />
+          <Text style={styles.preAppButtonText}>Start Pre-Application</Text>
+        </TouchableOpacity>
         <Text style={styles.footerText}>App Version 1.0.0</Text>
         <Text style={styles.footerText}>© 2025 Affordable NJ Housing</Text>
       </View>
-    </DrawerContentScrollView>
+    </View>
   );
 };
 
@@ -202,6 +205,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#fff",
     textAlign: "center",
+  },
+  preAppButton: {
+    backgroundColor: "#951627",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    gap: 8,
+  },
+  preAppButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 

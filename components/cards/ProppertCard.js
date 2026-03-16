@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
@@ -7,25 +7,20 @@ import {
   TouchableOpacity,
   Dimensions,
   Pressable,
-  Platform,
 } from "react-native";
 import {
-  Ionicons,
   FontAwesome,
   MaterialCommunityIcons,
-  AntDesign,
 } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import CustomText from "../common/Text";
+import { propertyImages } from "../../utils/propertyImageMapping";
 import { HOST } from "../../utils/static";
+import { COLORS, SHADOWS, SPACING, BORDER_RADIUS } from "../../utils/theme";
 
-// Map specific property IDs to local bundled images
-const idToLocalImage = {
-  // unit_1196061 should display unit_619802_WebFile.png from assets/images/propertyImage
-  unit_1196061: require("../../assets/images/propertyImage/unit_619802_WebFile.png"),
-};
+const idToLocalImage = propertyImages;
 
-const width = Dimensions.get("window").width;
-const height = Dimensions.get("window").height;
+const { width } = Dimensions.get("window");
 
 const PropertyCard = ({
   onPress,
@@ -39,13 +34,13 @@ const PropertyCard = ({
   widthlist,
 }) => {
   const desc = description
-    .replace(/\u00A0/g, " ")
+    ?.replace(/\u00A0/g, " ")
     .replace(/\s+/g, " ")
-    .trim();
+    .trim() || "";
   const cleanedStrig = desc.split("•").map((part) => part.trim());
 
   const getRandomRating = () => {
-    const min = 4.0;
+    const min = 4.5;
     const max = 5.0;
     return (Math.random() * (max - min) + min).toFixed(1);
   };
@@ -69,53 +64,63 @@ const PropertyCard = ({
   const resolvedSource = getImageSource();
 
   return (
-    <Pressable onPress={onPress}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.cardWrapper, pressed && { opacity: 0.95, transform: [{ scale: 0.98 }] }]}
+    >
       <View style={styles.card}>
         <View style={styles.imageContainer}>
           <Image source={resolvedSource} style={styles.image} />
-
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.6)"]}
+            style={styles.imageOverlay}
+          />
           <View style={styles.typeBadge}>
-            <Text style={styles.typeText}>{cleanedStrig[2]}</Text>
+            <Text style={styles.typeText}>{cleanedStrig[2] || type}</Text>
+          </View>
+          <View style={styles.ratingBadge}>
+            <FontAwesome name="star" size={12} color={COLORS.gold} />
+            <Text style={styles.ratingText}>{randomRating}</Text>
           </View>
         </View>
 
         <View style={styles.content}>
-          <View style={styles.titleRow}>
-            <CustomText style={styles.title}>{title}</CustomText>
-            <View style={styles.rating}>
-              <FontAwesome name="star" size={14} color="#FFA500" />
-              <Text style={styles.ratingText}>{randomRating}</Text>
+          <CustomText style={styles.title} numberOfLines={1}>
+            {title}
+          </CustomText>
+          
+          <View style={styles.locationContainer}>
+            <MaterialCommunityIcons name="map-marker-outline" size={14} color={COLORS.textSecondary} />
+            <CustomText style={styles.location} numberOfLines={1}>
+              {location}
+            </CustomText>
+          </View>
+
+          <View style={styles.specsContainer}>
+            <View style={styles.specPill}>
+              <MaterialCommunityIcons name="bed-outline" size={14} color={COLORS.accent} />
+              <Text style={styles.specText}>{cleanedStrig[0] || "1 Bed"}</Text>
+            </View>
+            <View style={styles.specPill}>
+              <MaterialCommunityIcons name="shower" size={14} color={COLORS.accent} />
+              <Text style={styles.specText}>{cleanedStrig[1] || "1 Bath"}</Text>
+            </View>
+            <View style={styles.specPill}>
+              <MaterialCommunityIcons name="vector-square" size={14} color={COLORS.accent} />
+              <Text style={styles.specText}>{cleanedStrig[2] || "Sqft"}</Text>
             </View>
           </View>
 
-          <CustomText style={styles.location}>{location}</CustomText>
-
-          <TouchableOpacity style={styles.priceButton} onPress={onPress}>
-            <Text style={styles.priceButtonText}>Contact</Text>
+          <TouchableOpacity style={styles.contactButtonContainer} onPress={onPress}>
+            <LinearGradient
+              colors={COLORS.GRADIENTS?.primary || ["#051138", "#1A3580"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.contactButton}
+            >
+              <Text style={styles.contactButtonText}>Contact Details</Text>
+            </LinearGradient>
           </TouchableOpacity>
-
-          <View style={styles.specs}>
-            <View style={styles.specItem}>
-              <MaterialCommunityIcons
-                name="bed-outline"
-                size={16}
-                color="#9d011f"
-              />
-              <Text style={styles.specText}>{cleanedStrig[0]}</Text>
-            </View>
-            <View style={styles.specItem}>
-              <MaterialCommunityIcons name="shower" size={16} color="#9d011f" />
-              <Text style={styles.specText}>{cleanedStrig[1]}</Text>
-            </View>
-            <View style={styles.specItem}>
-              <MaterialCommunityIcons
-                name="ruler-square"
-                size={16}
-                color="#9d011f"
-              />
-              <Text style={styles.specText}>{cleanedStrig[2]}</Text>
-            </View>
-          </View>
         </View>
       </View>
     </Pressable>
@@ -125,120 +130,117 @@ const PropertyCard = ({
 export default PropertyCard;
 
 const styles = StyleSheet.create({
+  cardWrapper: {
+    marginHorizontal: SPACING.sm,
+    marginVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.xl,
+    backgroundColor: COLORS.surface,
+    ...SHADOWS.medium,
+  },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 20,
-    width: width * 0.8,
-    marginHorizontal: 10,
-    marginVertical: 10,
-    borderRadius: 10,
-    // Android shadow
-    elevation: 5,
-
-    // iOS shadow
-    shadowColor: "#dimgray",
-    shadowOffset: { width: 1, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-
-    // IMPORTANT: overflow: 'hidden' disables shadow on iOS
-    // Remove it or use overflow: 'visible' if you need the shadow to show
-    overflow: Platform.OS === "ios" ? "visible" : "hidden",
+    width: width * 0.75,
+    borderRadius: BORDER_RADIUS.xl,
+    backgroundColor: COLORS.surface,
+    overflow: "hidden",
   },
   imageContainer: {
     position: "relative",
+    width: "100%",
+    height: 160,
   },
   image: {
     width: "100%",
-    height: 140,
-    borderRadius: 10,
+    height: "100%",
   },
-  heartIcon: {
+  imageOverlay: {
     position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "#fff",
-    padding: 6,
-    borderRadius: 20,
-    elevation: 2,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: "50%",
   },
   typeBadge: {
     position: "absolute",
-    bottom: 10,
-    left: 10,
-    backgroundColor: "#9d011f",
-    paddingHorizontal: 10,
+    bottom: SPACING.sm,
+    left: SPACING.sm,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingHorizontal: SPACING.md,
     paddingVertical: 4,
-    borderRadius: 10,
+    borderRadius: BORDER_RADIUS.pill,
   },
   typeText: {
     fontSize: 12,
-    color: "white",
-    fontWeight: "500",
+    color: COLORS.primary,
+    fontWeight: "700",
   },
-  content: {
-    padding: 12,
-  },
-  titleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#000",
-    flex: 1,
-  },
-  rating: {
+  ratingBadge: {
+    position: "absolute",
+    top: SPACING.sm,
+    right: SPACING.sm,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.pill,
   },
   ratingText: {
     marginLeft: 4,
-    fontSize: 13,
-    color: "#888",
+    fontSize: 12,
+    fontWeight: "700",
+    color: COLORS.textPrimary,
+  },
+  content: {
+    padding: SPACING.lg,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: COLORS.textPrimary,
+    marginBottom: 4,
+  },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.md,
   },
   location: {
     fontSize: 13,
-    color: "#999",
-    marginVertical: 6,
+    color: COLORS.textSecondary,
+    marginLeft: 4,
+    flex: 1,
   },
-  price: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#FF914D",
-  },
-  month: {
-    fontSize: 12,
-    color: "#999",
-  },
-  specs: {
+  specsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 10,
+    marginBottom: SPACING.lg,
   },
-  specItem: {
+  specPill: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: BORDER_RADIUS.md,
   },
   specText: {
-    fontSize: 12,
-    color: "#666",
-    marginLeft: 4,
-  },
-  priceButton: {
-    backgroundColor: "#051138",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  priceButtonText: {
-    color: "#fff",
-    fontSize: 14,
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    marginLeft: 6,
     fontWeight: "600",
+  },
+  contactButtonContainer: {
+    borderRadius: BORDER_RADIUS.lg,
+    overflow: "hidden",
+  },
+  contactButton: {
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  contactButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
   },
 });

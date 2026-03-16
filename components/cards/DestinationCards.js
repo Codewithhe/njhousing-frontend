@@ -2,27 +2,27 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import CustomText from "../common/Text";
 import CustomTextBold from "../common/BoldCustomtext";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const InternationalMigrations = () => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
-      <CustomText style={styles.title}>Search by County</CustomText>
-      <View style={styles.cardContainer}>
-        <Card
-          imageSource={{
-            uri: "https://images.unsplash.com/photo-1557335200-a65f7f032602?q=80&w=3558&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          }}
-          title="Dover"
-          subtitle="345 rented props"
-        />
-        <Card
-          imageSource={{
-            uri: "https://images.unsplash.com/photo-1619083382085-9452906b7157?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNhbGlmb3JuaWF8ZW58MHx8MHx8fDA%3D",
-          }}
-          title="Clifton"
-          subtitle="290 rented props"
-        />
-      </View>
+      <TouchableOpacity 
+        style={styles.preAppBanner}
+        onPress={() => navigation.navigate("Contact_now")}
+      >
+        <View style={styles.preAppContent}>
+          <MaterialCommunityIcons name="clipboard-text-outline" size={32} color="#fff" />
+          <View style={{ marginLeft: 16 }}>
+            <CustomTextBold style={styles.preAppTitle}>Start Pre-Application</CustomTextBold>
+            <CustomText style={styles.preAppSubtitle}>Check your eligibility today</CustomText>
+          </View>
+        </View>
+        <MaterialCommunityIcons name="chevron-right" size={24} color="#fff" />
+      </TouchableOpacity>
+
       <View style={styles.hostSection}>
         <View>
           <Image
@@ -47,50 +47,38 @@ const InternationalMigrations = () => {
   );
 };
 
-const Card = ({ imageSource, title, subtitle }) => (
-  <View style={styles.card}>
-    <Image source={imageSource} style={styles.cardImage} />
-    <CustomText style={styles.cardTitle}>{title}</CustomText>
-    <CustomText style={styles.cardSubtitle}>{subtitle}</CustomText>
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: "#ffffff",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  cardContainer: {
+  preAppBanner: {
+    backgroundColor: "#951627", // njhousing main red
+    borderRadius: 12,
+    padding: 20,
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  card: {
-    width: "48%",
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    padding: 8,
+  preAppContent: {
+    flexDirection: "row",
     alignItems: "center",
   },
-  cardImage: {
-    width: "100%",
-    height: 100,
-    borderRadius: 8,
-    marginBottom: 8,
+  preAppTitle: {
+    color: "#fff",
+    fontSize: 18,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  cardSubtitle: {
-    fontSize: 12,
-    color: "#888",
+  preAppSubtitle: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 14,
+    marginTop: 2,
   },
   hostSection: {
     backgroundColor: "#051138",

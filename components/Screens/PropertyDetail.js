@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Linking,
   FlatList,
-  Platform,
   Pressable,
   StatusBar,
   Animated,
@@ -31,6 +30,9 @@ import CustomText from "../common/Text";
 import { fetchpropdetails } from "../../utils/apicalls/fetchbytitle";
 import CustomTextBold from "../common/BoldCustomtext";
 import { useSelector } from "react-redux";
+import { propertyImages } from "../../utils/propertyImageMapping";
+import { HOST } from "../../utils/static";
+import { COLORS, SPACING, FONT_SIZE, BORDER_RADIUS, SHADOWS } from "../../utils/theme";
 
 const { width } = Dimensions.get("window");
 
@@ -127,44 +129,60 @@ export default function PropertyDetailScreen() {
                 showsVerticalScrollIndicator={false}
                 style={{ marginBottom: 100 }}
               >
-                <Image
-                  source={require("../../assets/images/cards/image_background.png")}
-                  style={styles.image}
-                />
+                <View style={styles.imageContainer}>
+                  {(() => {
+                    const localImg = propertyImages[id];
+                    const PLACEHOLDER = require("../../assets/images/propertyImage/unit_619802_webfile.png");
+                    let source = PLACEHOLDER;
 
-                {user.user.premiumEnabled === true ? (
-                  <TouchableOpacity
-                    style={styles.videoButton}
-                    onPress={() =>
-                      navigation.navigate("Root", {
-                        screen: "Tabs",
-                        params: {
-                          screen: "Lottery",
-                        },
-                      })
+                    if (localImg) {
+                      source = localImg;
+                    } else if (typeof data.image === "string" && /^https?:/i.test(data.image)) {
+                      source = { uri: data.image };
+                    } else if (data.image && data.image !== "N/A") {
+                      source = { uri: `${HOST}resources/${data.image}` };
+                      console.log(source)
                     }
-                  >
-                    <CustomText style={styles.videoButtonText}>
-                      Lottery
-                    </CustomText>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    style={styles.videoButton}
-                    onPress={() =>
-                      navigation.navigate("Root", {
-                        screen: "Tabs",
-                        params: {
-                          screen: "Subscriptions",
-                        },
-                      })
-                    }
-                  >
-                    <CustomText style={styles.videoButtonText}>
-                      Subscribe
-                    </CustomText>
-                  </TouchableOpacity>
-                )}
+
+                    return (
+                      <Image source={source} style={styles.image} />
+                    );
+                  })()}
+
+                  {user?.user?.premiumEnabled === true ? (
+                    <TouchableOpacity
+                      style={styles.videoButton}
+                      onPress={() =>
+                        navigation.navigate("Root", {
+                          screen: "Tabs",
+                          params: {
+                            screen: "Lottery",
+                          },
+                        })
+                      }
+                    >
+                      <CustomText style={styles.videoButtonText}>
+                        Lottery
+                      </CustomText>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.videoButton}
+                      onPress={() =>
+                        navigation.navigate("Root", {
+                          screen: "Tabs",
+                          params: {
+                            screen: "Subscription",
+                          },
+                        })
+                      }
+                    >
+                      <CustomText style={styles.videoButtonText}>
+                        Subscribe Plan
+                      </CustomText>
+                    </TouchableOpacity>
+                  )}
+                </View>
                 <View style={styles.content}>
                   <View
                     style={{
@@ -192,9 +210,8 @@ export default function PropertyDetailScreen() {
                     <View style={styles.iconText}>
                       <MaterialCommunityIcons
                         name="bed-outline"
-                        size={16}
-                        color="#888"
-                        style={{ marginLeft: 5 }}
+                        size={18}
+                        color={COLORS.primary}
                       />
                       <CustomText style={styles.infoText}>
                         {cleanedStrig[0]}
@@ -203,9 +220,8 @@ export default function PropertyDetailScreen() {
                     <View style={styles.iconText}>
                       <MaterialCommunityIcons
                         name="shower"
-                        size={16}
-                        color="#888"
-                        style={{ marginLeft: 5 }}
+                        size={18}
+                        color={COLORS.primary}
                       />
                       <CustomText style={styles.infoText}>
                         {cleanedStrig[1]}
@@ -214,9 +230,8 @@ export default function PropertyDetailScreen() {
                     <View style={styles.iconText}>
                       <MaterialCommunityIcons
                         name="office-building"
-                        size={16}
-                        color="#888"
-                        style={{ marginLeft: 5 }}
+                        size={18}
+                        color={COLORS.primary}
                       />
                       <CustomText style={styles.infoText}>
                         {cleanedStrig[2]}
@@ -224,158 +239,51 @@ export default function PropertyDetailScreen() {
                     </View>
                   </View>
 
-                  <View>
-                    <View style={{ marginTop: 20, margin: 10 }}>
-                      <>
-                        <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
-                          Kitchen
-                        </CustomTextBold>
-                      </>
-                      {Object.entries(data.details.kitchen).map(
-                        ([key, value], index) => (
-                          <View
-                            key={index}
-                            style={{
-                              flexDirection: "row",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-
-                              padding: 10,
-                              marginTop: 10,
-                              borderRadius: 10,
-                            }}
-                          >
-                            <CustomText style={[styles.value, { width: 150 }]}>
-                              {key}:
-                            </CustomText>
-                            <CustomText style={[styles.value]}>
-                              {value.split("|")[0]}
-                            </CustomText>
+                  {[
+                    { key: "Kitchen & Appliances", icon: "fridge-outline", title: "Kitchen & Appliances" },
+                    { key: "Bathroom", icon: "shower", title: "Bathroom" },
+                    { key: "Safety & Fire", icon: "fire", title: "Safety & Fire" },
+                    { key: "Accessibility", icon: "wheelchair-accessibility", title: "Accessibility" },
+                    { key: "Building & Entry", icon: "office-building", title: "Building & Entry" },
+                    { key: "Outdoor & Amenities", icon: "tree-outline", title: "Outdoor & Amenities" },
+                    { key: "Basic Features & Policies", icon: "shield-check-outline", title: "Basic Features & Policies" },
+                    { key: "Utilities", icon: "lightning-bolt", title: "Utilities" },
+                    { key: "Parking", icon: "car", title: "Parking" },
+                    { key: "neighborhood_amenities", icon: "map-marker-radius", title: "Amenities" }
+                  ].map((category, idx) => {
+                    return data.details?.[category.key] ? (
+                      <View key={idx} style={styles.cardSection}>
+                        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: SPACING.md }}>
+                          <MaterialCommunityIcons name={category.icon} size={24} color={COLORS.primary} style={{ marginRight: 8 }} />
+                          <CustomTextBold style={[styles.cardHeader, { marginBottom: 0 }]}>
+                            {category.title}
+                          </CustomTextBold>
+                        </View>
+                        {Object.entries(data.details[category.key]).map(([k, v], i) => (
+                          <View key={i} style={styles.detailRow}>
+                            <CustomText style={styles.detailKey}>{k}:</CustomText>
+                            <CustomText style={styles.detailValue}>{v ? String(v).split("|")[0] : "N/A"}</CustomText>
                           </View>
-                        )
-                      )}
-                    </View>
-                    <View style={{ marginTop: 20 }}>
-                      <>
-                        <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
-                          Bathroom
-                        </CustomTextBold>
-                      </>
-
-                      {Object.entries(data.details.bathroom).map(
-                        ([key, value], index) => (
-                          <View
-                            key={index}
-                            style={{
-                              flexDirection: "row",
-                              justifyContent: "space-between",
-                              padding: 10,
-                              marginTop: 10,
-                              borderRadius: 10,
-                            }}
-                          >
-                            <CustomText style={[styles.value, { width: 250 }]}>
-                              {key}:
-                            </CustomText>
-                            <CustomText style={[styles.value]}>
-                              {value.split("|")[0]}
-                            </CustomText>
-                          </View>
-                        )
-                      )}
-                    </View>
-                    <View style={{ marginTop: 20 }}>
-                      <>
-                        <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
-                          Appliances
-                        </CustomTextBold>
-                      </>
-
-                      {Object.entries(data.details.appliances).map(
-                        ([key, value], index) => (
-                          <View
-                            key={index}
-                            style={{
-                              flexDirection: "row",
-                              justifyContent: "space-between",
-
-                              padding: 10,
-                              marginTop: 10,
-                              borderRadius: 10,
-                            }}
-                          >
-                            <CustomText style={[styles.value, { width: 150 }]}>
-                              {key}:
-                            </CustomText>
-                            <CustomText style={[styles.value]}>
-                              {value.split("|")[0]}
-                            </CustomText>
-                          </View>
-                        )
-                      )}
-                    </View>
-                  </View>
-
-                  <View>
-                    <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
-                      Laundry
-                    </CustomTextBold>
-                  </View>
-
-                  {Object.entries(data.details.laundry).map(
-                    ([key, value], index) => (
-                      <View
-                        key={index}
-                        style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-
-                          padding: 10,
-                          marginTop: 10,
-                          borderRadius: 10,
-                        }}
-                      >
-                        <CustomText style={[styles.value, { width: 150 }]}>
-                          {key}:
-                        </CustomText>
-                        <CustomText style={[styles.value]}>
-                          {value.split("|")[0]}
-                        </CustomText>
+                        ))}
                       </View>
-                    )
-                  )}
+                    ) : null;
+                  })}
 
-                  {data.details.neighborhood_amenities && (
-                    <>
-                      <View>
-                        <CustomTextBold style={{ fontSize: 25, marginTop: 10 }}>
-                          Amenities
+                  {data.details?.["Other Details"] && (
+                    <View style={styles.cardSection}>
+                      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: SPACING.md }}>
+                        <MaterialCommunityIcons name="information-outline" size={24} color={COLORS.primary} style={{ marginRight: 8 }} />
+                        <CustomTextBold style={[styles.cardHeader, { marginBottom: 0 }]}>
+                          Other Details
                         </CustomTextBold>
                       </View>
-
-                      {Object.entries(
-                        data.details.neighborhood_amenities || {}
-                      ).map(([key, value], index) => (
-                        <View
-                          key={index}
-                          style={{
-                            flexDirection: "row",
-                            justifyContent: "space-around",
-
-                            padding: 10,
-                            marginTop: 10,
-                            borderRadius: 10,
-                          }}
-                        >
-                          <CustomText style={[styles.value, { width: 150 }]}>
-                            {key}:
-                          </CustomText>
-                          <CustomText style={[styles.value]}>
-                            {value.split("|")[0]}
-                          </CustomText>
+                      {Object.entries(data.details["Other Details"]).map(([key, value], index) => (
+                        <View key={index} style={[styles.detailRow, { flexDirection: "column", alignItems: "flex-start" }]}>
+                          <CustomText style={[styles.detailKey, { marginBottom: 4 }]}>{key}:</CustomText>
+                          <CustomText style={[styles.detailValue, { textAlign: "left" }]}>{value ? String(value).split("|")[0] : "N/A"}</CustomText>
                         </View>
                       ))}
-                    </>
+                    </View>
                   )}
                 </View>
 
@@ -388,7 +296,7 @@ export default function PropertyDetailScreen() {
               </ScrollView>
 
               <View style={styles.footerFixed}>
-                {user.user.premiumEnabled === true ? (
+                {user?.user?.premiumEnabled === true ? (
                   <TouchableOpacity
                     style={styles.contactButton}
                     onPress={() =>
@@ -409,7 +317,7 @@ export default function PropertyDetailScreen() {
                       navigation.navigate("Root", {
                         screen: "Tabs",
                         params: {
-                          screen: "Subscriptions",
+                          screen: "Subscription",
                         },
                       })
                     }
@@ -435,136 +343,157 @@ export default function PropertyDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  image: { width: "100%", height: 300 },
+  container: { flex: 1, backgroundColor: COLORS.background },
+  imageContainer: { position: "relative" },
+  image: { width: "100%", height: 320, borderBottomLeftRadius: BORDER_RADIUS.xxl, borderBottomRightRadius: BORDER_RADIUS.xxl },
   videoButton: {
-    borderWidth: 1,
-    borderColor: "#051138",
-    margin: 16,
-    padding: 12,
-    borderRadius: 24,
+    position: 'absolute',
+    bottom: -SPACING.xl,
+    right: SPACING.xl,
+    backgroundColor: COLORS.accent,
+    paddingHorizontal: SPACING.xxl,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.pill,
     alignItems: "center",
+    ...SHADOWS.medium,
+    zIndex: 10,
   },
   videoButtonText: {
-    color: "#051138",
-    fontWeight: "500",
+    color: COLORS.white,
+    fontFamily: "Poppins-Bold",
+    fontSize: FONT_SIZE.md,
   },
-  content: { paddingHorizontal: 16, marginBottom: 50 },
+  content: { paddingHorizontal: SPACING.lg, marginBottom: 80, paddingTop: SPACING.xl },
   title: {
-    fontSize: 18,
-    color: "#1F1D5B",
-    marginBottom: 4,
+    fontSize: FONT_SIZE.xxl,
+    color: COLORS.primary,
+    marginBottom: SPACING.sm,
+    fontFamily: "Poppins-Bold",
+    lineHeight: 32,
   },
-  subtitle: { color: "#555", marginBottom: 2 },
-  location: { color: "#555", marginBottom: 12 },
-  ownerInfo: {
+  infoRow: {
+    flexDirection: "row",
+    marginBottom: SPACING.xl,
+    marginTop: SPACING.sm,
+    backgroundColor: COLORS.surface,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
+    justifyContent: "space-around",
+    ...SHADOWS.small,
+  },
+  iconText: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 20,
-    marginTop: 16,
+    marginBottom: SPACING.xs,
+    gap: 6,
   },
-  ownerAvatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
-  ownerName: { fontWeight: "bold", color: "#1F1D5B" },
-  ownerRole: { fontSize: 12, color: "#888" },
-  section: { marginBottom: 24, marginHorizontal: 20 },
+  infoText: {
+    fontSize: 13,
+    color: COLORS.textPrimary,
+    marginLeft: 4,
+    fontFamily: "Poppins-Semi",
+  },
+  cardSection: {
+    backgroundColor: COLORS.surface,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    marginBottom: SPACING.lg,
+    ...SHADOWS.small,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  cardHeader: {
+    fontSize: FONT_SIZE.xl,
+    color: COLORS.primary,
+    marginBottom: SPACING.md,
+    fontFamily: "Poppins-Bold",
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderLight,
+  },
+  detailKey: {
+    color: COLORS.textSecondary,
+    fontSize: FONT_SIZE.md,
+    flex: 1,
+  },
+  detailValue: {
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZE.md,
+    flex: 1,
+    fontFamily: "Poppins-Semi",
+    textAlign: "right",
+  },
+  section: { marginBottom: SPACING.xxl, marginHorizontal: SPACING.lg },
   sectionTitle: {
-    fontWeight: "bold",
-    fontSize: 25,
-    color: "black",
-    marginBottom: 8,
-    marginTop: 10,
-    fontFamily: "Hind-Jalandhar-Bold",
+    fontFamily: "Poppins-Bold",
+    fontSize: FONT_SIZE.xl,
+    color: COLORS.primary,
+    marginBottom: SPACING.sm,
   },
-  facility: { fontSize: 14, marginVertical: 2, color: "#333" },
-  map: { width: "100%", height: 150, borderRadius: 8, marginVertical: 12 },
-  paragraph: { color: "#444", fontSize: 14, marginBottom: 8 },
-  advanceButton: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#051138",
-    borderRadius: 10,
-    padding: 16,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  advanceText: { color: "#fff", fontWeight: "600", fontSize: 16 },
-  advanceAmount: { color: "#fff", fontWeight: "600", fontSize: 16 },
-  testimonial: { marginBottom: 12 },
-  testimonialName: { fontWeight: "bold", marginBottom: 4, color: "#1F1D5B" },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderTopColor: "#eee",
-    borderTopWidth: 1,
-    paddingTop: 16,
-    paddingBottom: 32,
-  },
-  footerPrice: { fontSize: 18, fontWeight: "bold", color: "#1F1D5B" },
-  footerEstimation: { fontSize: 12, color: "#888" },
-  contactButton: {
-    backgroundColor: "#051138",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
-    width: 350,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  contactText: { color: "#fff", fontWeight: "600" },
+  map: { width: "100%", height: 180, borderRadius: BORDER_RADIUS.xl, marginVertical: SPACING.md },
   footerFixed: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderTopColor: "#eee",
-    borderTopWidth: 1,
-    backgroundColor: "#fff",
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.surface,
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
+    borderTopLeftRadius: BORDER_RADIUS.xl,
+    borderTopRightRadius: BORDER_RADIUS.xl,
+    ...SHADOWS.large,
   },
-  map: {
-    width: "100%",
-    height: 200,
-    borderRadius: 10,
-    marginTop: 10,
+  contactButton: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.xxl,
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.pill,
+    width: width - SPACING.xxl * 2,
+    justifyContent: "center",
+    alignItems: "center",
+    ...SHADOWS.medium,
   },
+  contactText: { color: COLORS.white, fontFamily: "Poppins-Bold", fontSize: FONT_SIZE.lg },
   tabRow: {
     flexDirection: "row",
     position: "relative",
     justifyContent: "center",
-    alignItems: "center  ",
+    alignItems: "center",
   },
   buttonBase: {
     width: 150,
-    padding: 10,
+    padding: SPACING.sm,
     alignItems: "center",
     borderBottomWidth: 2,
     borderColor: "transparent",
   },
   inactiveButton: {
-    borderColor: "#ccc",
+    borderColor: COLORS.gray300,
   },
   buttonText: {
-    fontSize: 16,
-    color: "blue",
+    fontSize: FONT_SIZE.md,
+    color: COLORS.accent,
   },
   indicator: {
     position: "absolute",
     bottom: 0,
     width: 150,
     height: 2,
-    backgroundColor: "blue",
+    backgroundColor: COLORS.accent,
   },
   tabContent: {
     width,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: SPACING.xl,
   },
   longcontainer: {
     alignItems: "center",
@@ -573,13 +502,13 @@ const styles = StyleSheet.create({
   toggleWrapper: {
     width: 320,
     height: 44,
-    borderRadius: 999,
-    backgroundColor: "#f5f5f5",
+    borderRadius: BORDER_RADIUS.pill,
+    backgroundColor: COLORS.gray100,
     flexDirection: "row",
     position: "relative",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: COLORS.border,
   },
   toggleButton: {
     flex: 1,
@@ -588,24 +517,25 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   text: {
-    fontSize: 14,
-    color: "#888",
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.textSecondary,
     fontWeight: "500",
   },
   activeText: {
-    color: "#fff",
+    color: COLORS.white,
+    fontWeight: "bold",
   },
   activeBg: {
     position: "absolute",
     width: 320 / 3,
     height: 44,
-    backgroundColor: "#051138", // Replace with gradient if needed
-    borderRadius: 999,
+    backgroundColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.pill,
     zIndex: 0,
   },
   infoRow: {
     flexDirection: "row",
-    marginBottom: 10,
+    marginBottom: SPACING.md,
   },
   iconText: {
     flexDirection: "row",
@@ -613,10 +543,14 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   infoText: {
-    fontSize: Platform.OS === "ios" ? 13 : 12,
-    color: "#666",
+    fontSize: 13,
+    color: COLORS.textSecondary,
     marginLeft: 4,
   },
+  value: {
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZE.md,
+  }
 });
 
 const ToggleScreen = ({ active, setActive }) => {

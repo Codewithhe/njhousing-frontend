@@ -5,56 +5,66 @@ import { WebView } from "react-native-webview";
 import { useDispatch, useSelector } from "react-redux";
 import { updateSubscription } from "../../utils/apicalls/SubscriptionUpdate";
 import { HOST } from "../../utils/static";
+import CustomText from "../common/Text";
 
-const StripeCheckoutButton = () => {
+const PaymentGateway = () => {
   const route = useRoute();
   const { user } = useSelector((state) => state.user);
 
-  const { name, amount } = route.params;
+  const { name, amount, method } = route.params;
   const [checkoutUrl, setCheckoutUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const handleStripeCheckout = async () => {
+
+  const handlePaymentInit = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${HOST}payment-gateway/create-checkout-session`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: name,
-            amount: amount, // in cents for $10
-            currency: "USD",
-            successUrl: "https://simfys.com/success",
-          }),
-        }
-      );
+      
+      // Determine endpoint based on method
+      const endpoint = method === "paypal" 
+        ? `${HOST}payment-gateway/create-paypal-order` 
+        : `${HOST}payment-gateway/create-checkout-session`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,
+          amount: amount, 
+          currency: "USD",
+          successUrl: "https://simfys.com/success",
+        }),
+      });
 
       const data = await response.json();
       if (data?.url) {
         setCheckoutUrl(data.url);
       } else {
-        Alert.alert("Error", "Failed to create checkout session");
+        Alert.alert("Error", `Failed to create ${method} checkout session`);
       }
     } catch (error) {
-      console.error("Checkout error", error);
-      Alert.alert("Error", "Something went wrong with checkout.");
+      console.error("Payment error", error);
+      Alert.alert("Error", "Something went wrong with the payment process.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(
-    () =>
-      setTimeout(() => {
-        handleStripeCheckout();
-      }, 2000),
-    []
-  );
+  useEffect(() => {
+    handlePaymentInit();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#003087" />
+        <CustomText style={{ marginTop: 20 }}>Initializing Secure Payment...</CustomText>
+      </View>
+    );
+  }
 
   if (checkoutUrl) {
     return (
@@ -64,9 +74,10 @@ const StripeCheckoutButton = () => {
         javaScriptEnabled
         domStorageEnabled
         onNavigationStateChange={(navState) => {
-          if (navState.url === "https://simfys.com/success") {
+          // Both Stripe and PayPal can use the same success callback 
+          if (navState.url.includes("https://simfys.com/success")) {
             const request = { plan: name };
-            updateSubscription(request, user._id, navigation);
+            updateSubscription(request, user?._id, navigation);
           }
         }}
       />
@@ -74,10 +85,10 @@ const StripeCheckoutButton = () => {
   }
 
   return (
-    <View style={{ marginTop: 20 }}>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <ActivityIndicator size="large" />
     </View>
   );
 };
 
-export default StripeCheckoutButton;
+export default PaymentGateway;
