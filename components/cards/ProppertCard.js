@@ -47,15 +47,18 @@ const PropertyCard = ({
 
   const randomRating = useMemo(() => getRandomRating(), []);
   const localImage = id ? idToLocalImage[id] : undefined;
-  const PLACEHOLDER = require("../../assets/images/propertyImage/unit_621870_grayNoPics.png");
+  const PLACEHOLDER = require("../../assets/images/propertyImage/unit_621870_graynopics.png");
 
   const getImageSource = () => {
     if (localImage) return localImage;
-    if (typeof image === "string" && /^https?:/i.test(image)) {
-      if (image.toLowerCase().includes("graynopics")) return PLACEHOLDER;
-      return { uri: image };
-    }
-    if (image && image !== "N/A") {
+    if (image && typeof image === "string") {
+      const lowerImg = image.toLowerCase();
+      if (lowerImg.includes("graynopics") || lowerImg === "n/a" || lowerImg === "") {
+        return PLACEHOLDER;
+      }
+      if (/^https?:/i.test(image)) {
+        return { uri: image };
+      }
       return { uri: `${HOST}resources/${image}` };
     }
     return PLACEHOLDER;

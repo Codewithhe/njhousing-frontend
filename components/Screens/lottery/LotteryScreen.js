@@ -32,13 +32,20 @@ export default function LotteryScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#FAFAFA" }}>
-      <ScrollView style={styles.detailContainer}>
-        <FlatList
-          data={lotteryData}
-          renderItem={renderCard}
-          keyExtractor={(item) => item.id}
-          showsHorizontalScrollIndicator={false}
-        />
+      <ScrollView 
+        style={styles.detailContainer} 
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.listWrapper}>
+          <FlatList
+            data={lotteryData}
+            renderItem={renderCard}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalListContent}
+          />
+        </View>
         <Text style={styles.title}>{selectedLottery.title}</Text>
         <Text style={styles.subText}>{selectedLottery.location}</Text>
 
@@ -167,5 +174,13 @@ const styles = StyleSheet.create({
     marginTop: 30,
     borderRadius: 12,
     alignSelf: "center",
+  },
+  listWrapper: {
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  horizontalListContent: {
+    paddingRight: 20,
+    paddingVertical: 10,
   },
 });

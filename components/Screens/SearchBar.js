@@ -48,17 +48,18 @@ const SearchBar = () => {
   };
 
   const handleFocus = () => {
+    // Instant state change to avoid double box visual
     setIsExpanded(true);
     Animated.parallel([
-      Animated.timing(expandAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
-      Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+      Animated.timing(expandAnim, { toValue: 1, duration: 300, useNativeDriver: false }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: false }),
     ]).start();
   };
 
   const handleClose = () => {
     Animated.parallel([
-      Animated.timing(expandAnim, { toValue: 0, duration: 250, useNativeDriver: false }),
-      Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(expandAnim, { toValue: 0, duration: 200, useNativeDriver: false }),
+      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: false }),
     ]).start(() => {
       setIsExpanded(false);
       setSuggestions([]);
@@ -103,7 +104,7 @@ const SearchBar = () => {
 
   return (
     <View style={styles.mainContainer}>
-      {/* Original Search Bar - Hidden when expanded to avoid double box */}
+      {/* Original Search Bar - Hidden when modal is active */}
       {!isExpanded && (
         <TouchableOpacity 
           style={styles.searchBar} 
@@ -124,8 +125,14 @@ const SearchBar = () => {
         </TouchableOpacity>
       )}
 
-      {/* Expanded Search Overlay */}
-      {isExpanded && (
+      {/* Expanded Search Modal - Uses Modal to ensure it covers the whole screen regardless of parent styles */}
+      <Modal
+        visible={isExpanded}
+        transparent={true}
+        animationType="none"
+        statusBarTranslucent={true}
+        onRequestClose={handleClose}
+      >
         <Animated.View 
           style={[
             styles.fullScreenOverlay,
@@ -135,7 +142,7 @@ const SearchBar = () => {
                 {
                   translateY: expandAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [50, 0],
+                    outputRange: [20, 0],
                   })
                 }
               ]
@@ -204,7 +211,7 @@ const SearchBar = () => {
             </View>
           </SafeAreaView>
         </Animated.View>
-      )}
+      </Modal>
     </View>
   );
 };
@@ -250,13 +257,8 @@ const styles = StyleSheet.create({
   
   // Overlay Styles
   fullScreenOverlay: {
-    position: 'fixed',
-    top: -100, // Cover the header area
-    left: -20, // Cover padding
-    width: width + 40,
-    height: height + 100,
+    flex: 1,
     backgroundColor: COLORS.white,
-    zIndex: 9999,
   },
   safeArea: {
     flex: 1,
@@ -270,7 +272,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingTop: Platform.OS === 'ios' ? 10 : 20,
     paddingBottom: 15,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight,

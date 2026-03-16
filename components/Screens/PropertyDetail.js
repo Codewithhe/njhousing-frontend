@@ -132,16 +132,20 @@ export default function PropertyDetailScreen() {
                 <View style={styles.imageContainer}>
                   {(() => {
                     const localImg = propertyImages[id];
-                    const PLACEHOLDER = require("../../assets/images/propertyImage/unit_619802_webfile.png");
+                    const PLACEHOLDER = require("../../assets/images/propertyImage/unit_621870_graynopics.png");
                     let source = PLACEHOLDER;
 
                     if (localImg) {
                       source = localImg;
-                    } else if (typeof data.image === "string" && /^https?:/i.test(data.image)) {
-                      source = { uri: data.image };
-                    } else if (data.image && data.image !== "N/A") {
-                      source = { uri: `${HOST}resources/${data.image}` };
-                      console.log(source)
+                    } else if (data.image && typeof data.image === "string") {
+                      const lowerImg = data.image.toLowerCase();
+                      if (lowerImg.includes("graynopics") || lowerImg === "n/a" || lowerImg === "") {
+                        source = PLACEHOLDER;
+                      } else if (/^https?:/i.test(data.image)) {
+                        source = { uri: data.image };
+                      } else {
+                        source = { uri: `${HOST}resources/${data.image}` };
+                      }
                     }
 
                     return (

@@ -4,7 +4,7 @@
     "slug": "affordable-nj-housing-perfect-home-in-nj",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo_comp/nj_house_map.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "assetBundlePatterns": [
@@ -13,9 +13,7 @@
     ],
     "updates": {
       "url": "https://u.expo.dev/2f39b47a-c7d5-49bb-89bd-926e9162a01a",
-      "enabled": true,
-      "checkOnLaunch": "ALWAYS",
-      "fallbackToCacheTimeout": 0
+      "enabled": true
     },
     "runtimeVersion": "1.0.0",
     "splash": {

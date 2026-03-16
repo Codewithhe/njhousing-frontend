@@ -1,7 +1,7 @@
 import axios from "axios";
 import { HOST } from "../static";
 
-const API_TIMEOUT = 10000; // 10 seconds
+const API_TIMEOUT = 15000; // Increased to 15s for Vercel cold starts
 
 export const fetchSearchProperties = async (query, setData) => {
   const q = (query || "").trim();
@@ -22,19 +22,25 @@ export const fetchSearchProperties = async (query, setData) => {
         timeout: API_TIMEOUT,
       }
     );
-    const results = response.data || [];
-    if (Array.isArray(results) && results.length > 0) {
-      setData(results);
+    
+    if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+      setData(response.data);
       return;
     }
-    // Fallback: fetch all and filter client-side by title/address
+    
+    // Fallback if search returns nothing or not found
     await fallbackSearch(q, setData);
   } catch (error) {
-    console.warn("Primary search failed, trying fallback:", error?.message);
+    // Check if it's a network error or timeout
+    const errorMsg = error.response ? `Server Error: ${error.response.status}` : 
+                    error.request ? "Network Error (Server Unreachable)" : error.message;
+    
+    console.warn(`Search attempt failed (${errorMsg}), using local filter fallback...`);
+    
     try {
       await fallbackSearch(q, setData);
-    } catch (e) {
-      console.error("Fallback search also failed:", e?.message);
+    } catch (fallbackError) {
+      console.error("Search system completely offline:", fallbackError?.message);
       setData([]);
     }
   }
